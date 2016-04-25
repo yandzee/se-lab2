@@ -1,0 +1,12 @@
+{
+  "license": "MIT",
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "jscs": "^3.0.3"
+  },
+  "scripts": {
+    "test": "node test/index.js",
+    "check-style": "jscs ."
+  }
+}
