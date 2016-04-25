@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# To style check JS:
+# `ln -s ../../jscs-pre-commit .git/hooks/pre-commit`
+
+export PATH="./node_modules/.bin:$PATH"
+
+JSCS=./node_modules/.bin/jscs
+JSFILES=$(git diff-index --name-status --cached HEAD | grep -v ^D | egrep '.js$' | cut -c3-)
+
+if [ -n "$JSFILES" ]; then
+  echo -e "\033[0;34mChecking JS style...\033[0;0m"
+  jscs $JSFILES
+  exit $?
+fi
