@@ -1,6 +1,5 @@
 'use strict';
 
-const co = require('co');
 const sqlite3 = require('co-sqlite3');
 
 const extractor = require('./extractor');
