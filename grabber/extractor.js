@@ -12,7 +12,8 @@ function checkStats(stats) {
 
 function calcTimestamp(eyear, edays) {
   let year = eyear < 57 ? 2000 + eyear : 1900 + eyear;
-  return Date.UTC(year, 0, 1) + 1440 * (edays - 1) * 60 * 1000;
+  let ms = Date.UTC(year, 0, 1) + 1440 * (edays - 1) * 60 * 1000;
+  return Math.round(ms);
 }
 
 exports.parse = function (tle) {
