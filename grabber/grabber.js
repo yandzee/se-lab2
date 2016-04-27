@@ -17,8 +17,6 @@ const tables = [
 
     epochyr   integer not null,
     epochdays real    not null,
-    ndot      real    not null,
-    nddot     real    not null,
     bstar     real    not null,
     inclo     real    not null,
     nodeo     real    not null,
@@ -44,9 +42,9 @@ class Grabber {
     this.sql = yield {
       insertSatellite: db.prepare('insert or ignore into satellite(satnum, title) values (?, ?)'),
       insertOrbelement: db.prepare(`insert or ignore into
-                                    orbelement(satnum, timestamp, epochyr, epochdays, ndot, nddot,
+                                    orbelement(satnum, timestamp, epochyr, epochdays,
                                                bstar, inclo, nodeo, ecco, argpo, mo, no)
-                                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`),
+                                    values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`),
     };
   }
 
@@ -55,20 +53,22 @@ class Grabber {
 
     console.log(`Fetched ${tles.length} from ${fetcher.info}.`);
 
+    // FIXME: transactions complicate parallelism.
+    yield this.db.run('begin');
+
     for (let tle of tles)
       yield* this.processTLE(tle);
+
+    yield this.db.run('commit');
   }
 
   *processTLE(tle) {
     let satellite = extractor.parse(tle);
-    let ts = satellite.timestamp;
     let st = satellite.stats;
-
-    // NOTE: don't use transactions. It complicates parallelism.
 
     yield [
       this.sql.insertSatellite.run(st.satnum, satellite.title),
-      this.sql.insertOrbelement.run(st.satnum, ts, st.epochyr, st.epochdays, st.ndot, st.nddot,
+      this.sql.insertOrbelement.run(st.satnum, satellite.timestamp, st.epochyr, st.epochdays,
                                     st.bstar, st.inclo, st.nodeo, st.ecco, st.argpo, st.mo, st.no),
     ];
   }

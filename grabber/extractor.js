@@ -30,6 +30,9 @@ exports.parse = function (tle) {
   else
     throw new Error('Invalid number of lines');
 
+  delete stats.ndot;
+  delete stats.nddot;
+
   if (!checkStats(stats))
     throw new Error('Bad values');
 
