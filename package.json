@@ -1,7 +1,10 @@
 {
   "license": "MIT",
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "satellite.js": "loyd/satellite-js",
+    "sqlite3": "^3.1.3"
+  },
   "devDependencies": {
     "jscs": "^3.0.3"
   },
