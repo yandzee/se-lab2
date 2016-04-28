@@ -103,6 +103,11 @@ class Server {
   *file(next) {
     let rpath = this.path === '/' ? '/index.html' : this.path;
     let fpath = path.resolve(__dirname + '/../client' + rpath);
+
+    //#XXX: workaround until the pull request is accepted.
+    if (this.path === '/satellite.min.js')
+      fpath = path.resolve(__dirname + '/../node_modules/satellite.js/dist' + this.path);
+
     try {
       let fstat = yield done => fs.stat(fpath, done);
       if (fstat.isFile()) {
