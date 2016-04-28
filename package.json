@@ -4,6 +4,7 @@
   "dependencies": {
     "co": "^4.6.0",
     "co-sqlite3": "^0.1.3",
+    "koa": "^1.2.0",
     "request-promise": "^3.0.0",
     "satellite.js": "loyd/satellite-js"
   },

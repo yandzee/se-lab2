@@ -3,10 +3,12 @@
 const co = require('co');
 
 const Searcher = require('./searcher');
+const Server = require('./server');
 
 co(function* () {
   let searcher = new Searcher;
   yield* searcher.connect('sat.db');
-  let result = yield* searcher.period(12003);
-  console.log(result);
+
+  let server = new Server(searcher);
+  server.listen(3000);
 }).catch(ex => console.error(ex.stack));
