@@ -7,6 +7,7 @@ class Searcher {
     let db = this.db = yield sqlite3(dbname);
 
     this.sql = yield {
+      selectSatellites: db.prepare(`select * from satellite`),
       selectRecent: db.prepare(`select max(timestamp), * from orbelement where satnum = ?`),
       selectClosest: db.prepare(`
               select max(timestamp), * from orbelement where satnum = ?1 and timestamp <= ?2
@@ -14,6 +15,10 @@ class Searcher {
       selectBetween: db.prepare(`select * from orbelement
                                  where satnum = ? and timestamp between ? and ?`),
     };
+  }
+
+  *satellites() {
+    return yield this.sql.selectSatellites.all();
   }
 
   *closest(satnum, timestamp) {

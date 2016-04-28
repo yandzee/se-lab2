@@ -11,6 +11,7 @@ class Server {
     app.context.searcher = searcher;
 
     app.use(this.logger);
+    app.use(this.satellites);
     app.use(this.period);
     app.use(this.revol);
     app.use(this.file);
@@ -29,6 +30,14 @@ class Server {
     yield* next;
     let ms = Date.now() - start;
     console.log('%s %s - %sms', this.method, this.url, ms);
+  }
+
+  *satellites(next) {
+    if (this.path !== '/satellites')
+      return yield* next;
+
+    this.type = 'json';
+    this.body = yield* this.searcher.satellites();
   }
 
   *period(next) {
