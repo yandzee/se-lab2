@@ -46,8 +46,16 @@ class Server {
       return;
     }
 
-    let result = yield* this.searcher.period(satnum, ts0, ts1);
-    console.log(result);
+    let result;
+    try {
+      result = yield* this.searcher.period(satnum, ts0, ts1);
+    } catch (ex) {
+      if (!/no such/i.test(ex.message))
+        throw ex;
+
+      this.status = 422;
+      return;
+    }
 
     this.type = 'json';
     this.body = result;
@@ -68,8 +76,16 @@ class Server {
       return;
     }
 
-    let result = yield* this.searcher.revolutions(satnum, ts, nrevs);
-    console.log(result);
+    let result;
+    try {
+      result = yield* this.searcher.revolutions(satnum, ts, nrevs);
+    } catch (ex) {
+      if (!/no such/i.test(ex.message))
+        throw ex;
+
+      this.status = 422;
+      return;
+    }
 
     this.type = 'json';
     this.body = result;
