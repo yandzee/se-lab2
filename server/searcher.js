@@ -32,8 +32,12 @@ class Searcher {
 
     let candidates = yield this.sql.selectClosest.all(satnum, timestamp);
 
-    if (candidates.length < 2)
-      throw new Error('No such satellite');
+    if (candidates.length === 1) {
+      if (candidates[0].satnum)
+        return candidates[0];
+      else
+        throw new Error('No such satellite');
+    }
 
     if (!candidates[0].satnum || !candidates[1].satnum)
       return candidates[0].satnum ? candidates[0] : candidates[1];
@@ -56,11 +60,12 @@ class Searcher {
   *revolutions(satnum, timestamp, nrevs) {
     nrevs = nrevs || 1;
 
-    let no = (yield* this.closest(satnum, timestamp)).no;
+    let closest = yield* this.closest(satnum, timestamp);
+    let no = closest.no;
 
     // Stationary orbit.
     if (Math.round(no * 100) === 0)
-      return [];
+      return [closest];
 
     let revTime = 24 * 60 * 60 * 1000 * nrevs / no;
     let window = revTime / 1.99;
