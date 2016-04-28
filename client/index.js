@@ -18,3 +18,5 @@ $('#navigation a').click(e => {
   $(container).load(page);
   $(this).tab('show');
 });
+
+$('a[href="#map-tab"]').click();
