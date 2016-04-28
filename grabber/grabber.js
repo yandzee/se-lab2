@@ -29,10 +29,6 @@ const tables = [
 ];
 
 class Grabber {
-  constructor(dbname) {
-    this.db = null;
-  }
-
   *connect(dbname) {
     let db = this.db = yield sqlite3(dbname);
 
