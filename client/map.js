@@ -1,9 +1,7 @@
 'use strict';
 
 $(() => {
-  console.log('in map.js');
-
-  $('#ydz').click(e => {
-    $(e.target).text('ydz is here');
+  $('div.panel a').click(e => {
+    // set panel-primary to selected
   });
 });
