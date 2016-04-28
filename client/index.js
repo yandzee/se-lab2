@@ -1,22 +1,21 @@
 'use strict';
 
-jQuery.cachedScript = function (url, options) {
-  options = $.extend(options || {}, {
-    dataType: 'script',
-    cache: true,
-    url: url,
-  });
+let list = new ListComponent($('#list-component'));
+let map  = new MapComponent($('#map-component'));
 
-  return jQuery.ajax(options);
-};
-
-$('#navigation a').click(e => {
-  e.preventDefault();
-  let $a = $(e.target);
-  let container = $a.attr('href');
-  let page = $a.attr('data-tab-file');
-  $(container).load(page);
-  $(this).tab('show');
+list.on('selected', satnum => {
+  map.addSatellite(satnum);
 });
 
-$('a[href="#map-tab"]').click();
+list.on('unselected', satnum => {
+  map.hideSatellite(satnum);
+});
+
+$('#config-btn').click(e => {
+
+});
+
+$('#config-save-btn').click(e => {
+  console.log('Saving...');
+  $('#config-modal').modal('hide');
+});

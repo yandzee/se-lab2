@@ -4,30 +4,87 @@
     <title>Bite my shiny metal ass</title>
     <meta charset="utf-8">
     <link rel="stylesheet" href="styles/core.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
+    <script src="http://code.jquery.com/jquery-2.2.3.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBrh6DQvXz0vbILEJlYnM2b5IMNrdVO7nA&callback=initMap"></script> -->
+    <script src="https://maps.googleapis.com/maps/api/js"></script>
+    <script src="utils.js"></script>
+    <script src="fetcher.js"></script>
+    <script src="list.js"></script>
+    <script src="map.js"></script>
+    <script src="index.js" defer></script>
+
+    <script type="text/html" id="list-elem-template">
+      <tr data-satnum="<%satnum%>">
+        <td><%title%></td><td><%satnum%></td>
+      </tr>
+    </script>
 </head>
 <body>
-    <nav>
-        <ul class="nav nav-tabs" id="navigation">
-            <li class="active">
-                <a href="#map-tab" data-tab-file="map-tab.html" data-toggle="tab">Map</a>
-            </li>
-            <li>
-                <a href="#config-tab" data-tab-file="config-tab.html" data-toggle="tab">Configuration</a>
-            </li>
-        </ul>
-    </nav>
-    <div class="tab-content">
-        <div role="tabpanel" class="tab-pane active" id="map-tab"></div>
-        <div role="tabpanel" class="tab-pane" id="config-tab"></div>
+  <div class="row">
+    <div class="col-xs-3">      
+      <div class="satellite-list">
+        <div style="">
+          <h3>Satellite list</h3>
+        </div>
+        <div class="tall-div" id="list-component">
+          <table class="table table-bordered table-condensed">
+            <thead>
+              <tr>
+                <td>
+                  <input class="form-control input-sm" placeholder="Title" id="title-filter">
+                </td>
+                <td>
+                  <input class="form-control input-sm" placeholder="ID" id="id-filter">
+                </td>
+              </tr>
+              <tr>
+                <th>Title</th><th>ID</th>
+              </tr>
+            </thead>
+            <tbody id="satellites">
+              
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="bottom-info">
+        Satellite info
+      </div>
     </div>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" 
-            integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" 
-            crossorigin="anonymous"></script>
-    <script src="index.js"></script>
+    <div class="col-xs-9">
+      <h3>Map</h3>
+      <div id="map-component">
+        <div id="google-map" style='width: 1024px; height: 768px;'>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="config-button">
+    <button class="btn btn-primary" id="config-btn" data-toggle="modal" data-target="#config-modal">
+      <span class="glyphicon glyphicon-wrench"></span>
+    </button>
+  </div>
+  <div class="modal fade" id="config-modal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">
+            <span>&times;</span>
+          </button>
+          <h4 class="modal-title" id="myModalLabel">Configuration</h4>
+        </div>
+        <div class="modal-body">
+          ...
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id='config-save-btn'>Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
-
 </html>

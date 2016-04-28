@@ -1,6 +1,38 @@
-@media screen {
-	body {
-		margin: 0;
-		padding: 0;
-	}
+body {
+	margin: 0;
+	padding: 0;
+}
+
+.footer {
+	position: absolute;
+	bottom: 0;
+	height: 60px;
+	width: 100%;
+	/*border: 1px solid red;*/
+}
+
+.satellite-list {
+	position: fixed; 
+	/*border: 1px solid green; */
+	height: 55%;
+	overflow: scroll;
+}
+
+.tall-div {
+	overflow: scroll;
+	height: 80%;
+	margin-top: 0px;
+}
+
+.bottom-info {
+	/*border: 1px solid red; */
+	position: fixed; 
+	bottom: 0;  
+	height: 45%;
+}
+
+.config-button {
+	position: absolute;
+	right: 25px;
+	bottom: 25px;
 }
