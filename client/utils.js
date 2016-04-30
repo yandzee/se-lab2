@@ -46,4 +46,3 @@ function tmpl(id) {
   code = (code + 'return r.join(""); }').replace(/[\r\t\n]/g, ' ');
   return new Function('__obj', code);
 }
-

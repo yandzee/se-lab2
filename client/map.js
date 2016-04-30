@@ -69,7 +69,6 @@ class MapComponent extends EventEmitter {
         date.getUTCMinutes(),
         date.getUTCSeconds()
     );
-    // debugger;
     let positionGd = satellite.eciToGeodetic(positionAndVelocity.position, gmst);
     return positionGd;
   }
