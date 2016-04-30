@@ -3,11 +3,17 @@
 class Fetcher {
   fetchSatellites() {
     return new Promise((resolve, reject) => {
-      resolve([
-        { title: 'shit1', satnum: 1 },
-        { title: 'shit2', satnum: 2 },
-        { title: 'shit3', satnum: 3 },
-      ]);
+      $.get(window.location.origin + '/satellites', (data) => {
+        resolve(data);
+      });
+    });
+  }
+
+  fetchRevolutions(satnum) {
+    return new Promise((resolve, reject) => {
+      $.get(window.location.origin + '/revol', { satnum }, (data) => {
+        resolve(data);
+      });
     });
   }
 }

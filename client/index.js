@@ -4,7 +4,7 @@ let list = new ListComponent($('#list-component'));
 let map  = new MapComponent($('#map-component'));
 
 list.on('selected', satnum => {
-  map.addSatellite(satnum);
+  map.showSatellite(satnum);
 });
 
 list.on('unselected', satnum => {
