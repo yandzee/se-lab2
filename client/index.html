@@ -62,7 +62,21 @@
       <div class="second-column">
         <div id="map-component">
           <h3>Map</h3>
-          <div id="google-map" style='width: 70%; min-width: 400px; height: 500px;'>
+          <form class="form-inline">
+            <div class="form-group">
+              <label>Since </label>
+              <input class="form-control" type="date">
+            </div>
+            <div class="form-group">
+              <label>Until </label>
+              <input class="form-control" type="date">
+            </div>
+            <div class="form-group">
+              <label>Revolutions:</label>
+              <input class="form-control" type="number" value=1>
+            </div>
+          </form>
+          <div id="google-map" style='width: 70%; height: 500px;'>
           </div>
         </div>
       </div>
