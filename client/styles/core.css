@@ -44,3 +44,7 @@ html, body {
 .title-column {
   width: 300px;
 }
+
+#google-map {
+  margin-top: 20px;
+}
