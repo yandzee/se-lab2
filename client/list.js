@@ -5,14 +5,41 @@ class ListComponent extends EventEmitter {
     super();
     this.elems = [];
     this.selected = [];
-    this.trs = $listDiv.find('#satellites');
-    this.fetchData();
+    this.table = $listDiv.find('#satellites');
+    this.titleFilter = $listDiv.find('#title-filter');
+    this.idFilter = $listDiv.find('#id-filter');
+
+    this.fetchData().then(() => {
+      this.makeFilters()
+    });
+  }
+
+  makeFilters() {
+    let $tFilter = this.titleFilter;
+    let $idFilter = this.idFilter;
+    let $trs = this.table.find('tr');
+    let $titles = $trs.find('td:nth(0)');
+    let $ids = $trs.find('td:nth(1)');
+
+    let filterHandler = $searchSet => {
+      return (e) => {
+        $trs.removeClass('hide');
+        let re = new RegExp(e.target.value, 'i');
+
+        $searchSet.filter((_, elem) => {
+          return !re.test($(elem).text());
+        }).closest('tr').addClass('hide');
+      };
+    };
+
+    $tFilter.keyup(filterHandler($titles));
+    $idFilter.keyup(filterHandler($ids));
   }
 
   makeTable(satellites) {
     for (let sat of satellites) {
       let html = tmpl('list-elem-template');
-      this.trs.append($(html(sat)));
+      this.table.append($(html(sat)));
     }
 
     this.setTableHandlers();
@@ -20,13 +47,13 @@ class ListComponent extends EventEmitter {
 
   fetchData() {
     let f = new Fetcher();
-    f.fetchSatellites().then(satellites => {
+    return f.fetchSatellites().then(satellites => {
       this.makeTable(satellites);
     });
   }
 
   setTableHandlers() {
-    this.trs.delegate('tr', 'click', (e) => {
+    this.table.delegate('tr', 'click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       let $tr = $(e.currentTarget);
