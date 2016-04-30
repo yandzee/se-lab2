@@ -18,46 +18,51 @@
 
       <script type="text/html" id="list-elem-template">
         <tr data-satnum="<%satnum%>">
-          <td><%title%></td><td><%satnum%></td>
+          <td class="title-column"><%title%></td><td><%satnum%></td>
         </tr>
       </script>
   </head>
-  <body>
-    <div class="row">
-      <div class="col-xs-3">      
-        <div class="satellite-list">
+  <body>  
+    <div class="first-column">   
+      <div class="top-first-column">
+        <div id="list-component">
           <div style="">
             <h3>Satellite list</h3>
           </div>
-          <div class="tall-div" id="list-component">
+          <table class="table table-bordered table-condensed" style="margin-bottom: 0;">
+            <thead>
+              <tr>
+                <td class="title-column">
+                  <input class="form-control input-sm" placeholder="Title" id="title-filter">
+                </td>
+                <td>
+                  <input class="form-control input-sm" placeholder="ID" id="id-filter">
+                </td>
+              </tr>
+              <tr>
+                <th>Title</th><th>ID</th>
+              </tr>
+            </thead>
+          </table>
+          <div style="height: 300px; overflow: scroll;">
             <table class="table table-bordered table-condensed">
-              <thead>
-                <tr>
-                  <td>
-                    <input class="form-control input-sm" placeholder="Title" id="title-filter">
-                  </td>
-                  <td>
-                    <input class="form-control input-sm" placeholder="ID" id="id-filter">
-                  </td>
-                </tr>
-                <tr>
-                  <th>Title</th><th>ID</th>
-                </tr>
-              </thead>
-              <tbody id="satellites">
+              <tbody id="satellites" class="scroll">
                 
               </tbody>
             </table>
           </div>
         </div>
-        <div class="bottom-info">
+      </div>
+      <div class="bottom-first-column">
+        <div id="info-component">
           Satellite info
         </div>
       </div>
-      <div class="col-xs-9">
-        <h3>Map</h3>
+    </div>
+      <div class="second-column">
         <div id="map-component">
-          <div id="google-map" style='width: 1024px; height: 768px;'>
+          <h3>Map</h3>
+          <div id="google-map" style='width: 70%; min-width: 400px; height: 500px;'>
           </div>
         </div>
       </div>

@@ -1,38 +1,46 @@
-body {
-	margin: 0;
-	padding: 0;
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
 
-.footer {
-	position: absolute;
-	bottom: 0;
-	height: 60px;
-	width: 100%;
-	/*border: 1px solid red;*/
+.first-column {
+  position: fixed;
+  width: 400px;
+  /*border: 1px solid red;*/
+  height: 100%;
+  overflow: scroll;
 }
 
-.satellite-list {
-	position: fixed; 
-	/*border: 1px solid green; */
-	height: 55%;
-	overflow: scroll;
+.top-first-column {
+  /*border: 1px solid green;*/
+  height: 60%;
+  position: relative;
+  overflow: hidden;
 }
 
-.tall-div {
-	overflow: scroll;
-	height: 80%;
-	margin-top: 0px;
+.bottom-first-column {
+  /*border: 1px solid purple;*/
+  border-top: 1px solid lightgray;
+  overflow: hidden;
+  height: 40%;
+  overflow: hidden;
 }
 
-.bottom-info {
-	/*border: 1px solid red; */
-	position: fixed; 
-	bottom: 0;  
-	height: 45%;
+.second-column {
+  position: fixed;
+  margin-left: 415px;
+  height: 100%;
+  /*border: 1px solid gray;*/
+  width: 100%;
 }
 
 .config-button {
-	position: absolute;
-	right: 25px;
-	bottom: 25px;
+  position: absolute;
+  right: 25px;
+  bottom: 25px;
+}
+
+.title-column {
+  width: 300px;
 }
