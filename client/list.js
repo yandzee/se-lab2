@@ -10,7 +10,7 @@ class ListComponent extends EventEmitter {
     this.idFilter = $listDiv.find('#id-filter');
 
     this.fetchData().then(() => {
-      this.makeFilters()
+      this.makeFilters();
     });
   }
 
@@ -22,14 +22,17 @@ class ListComponent extends EventEmitter {
     let $ids = $trs.find('td:nth(1)');
 
     let filterHandler = $searchSet => {
-      return (e) => {
+
+      let handler = e => {
         $trs.removeClass('hide');
         let re = new RegExp(e.target.value, 'i');
 
-        $searchSet.filter((_, elem) => {
-          return !re.test($(elem).text());
-        }).closest('tr').addClass('hide');
+        $searchSet.filter((_, elem) => !re.test($(elem).text()))
+                  .closest('tr')
+                  .addClass('hide');
       };
+
+      return throttle(handler, 400);
     };
 
     $tFilter.keyup(filterHandler($titles));
@@ -58,9 +61,9 @@ class ListComponent extends EventEmitter {
       e.stopPropagation();
       let $tr = $(e.currentTarget);
       if (e.ctrlKey || e.altKey)
-        $tr.toggleClass('active');
+        $tr.toggleClass('info');
       let satnum = $tr.data('satnum');
-      if ($tr.hasClass('active'))
+      if ($tr.hasClass('info'))
         this.emit('selected', satnum);
       else
         this.emit('unselected', satnum);
