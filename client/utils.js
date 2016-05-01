@@ -46,3 +46,15 @@ function tmpl(id) {
   code = (code + 'return r.join(""); }').replace(/[\r\t\n]/g, ' ');
   return new Function('__obj', code);
 }
+
+function throttle(f, ms) {
+  let timerId;
+  let _this = this;
+
+  let wrapper = (...args) => {
+    clearTimeout(timerId);
+    timerId = setTimeout(() => f.apply(_this, args), ms);
+  };
+
+  return wrapper;
+}
