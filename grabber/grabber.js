@@ -51,8 +51,16 @@ class Grabber {
     // FIXME: transactions complicate parallelism.
     yield this.db.run('begin');
 
-    for (let tle of tles)
-      yield* this.processTLE(tle);
+    for (let tle of tles) {
+      try {
+        yield* this.processTLE(tle);
+      } catch (ex) {
+        console.error(`Error while processing TLE from ${fetcher.info}: ${ex.message}`);
+        console.error('~'.repeat(50));
+        console.error(tle);
+        console.error('~'.repeat(50));
+      }
+    }
 
     yield this.db.run('commit');
   }
