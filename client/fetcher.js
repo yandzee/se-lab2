@@ -26,6 +26,8 @@ let fetcher = (exports => {
     return new Promise((resolve, reject) => {
       $.get(window.location.origin + '/info', { satnum },
         data => resolve(data));
+    });
+  };
 
   exports.fetchSatellites  = fetchSatellites;
   exports.fetchPeriod      = fetchPeriod;
