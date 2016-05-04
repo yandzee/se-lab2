@@ -3,7 +3,7 @@
 const sqlite3 = require('co-sqlite3');
 
 const extractor = require('./extractor');
-const infoFetcher = require('./info_fetcher');
+const informer = require('./informer');
 
 const tables = [
   `satellite(
@@ -104,7 +104,7 @@ class Grabber {
 
     if (!row || row.launch == null) {
       console.log(`Fetching info for ${orbel.satnum}...`);
-      let i = yield* infoFetcher.fetchInfo(orbel.satnum);
+      let i = yield* informer.fetchInfo(orbel.satnum);
       yield this.sql.updateInfo.run(i.intl, i.perigee, i.apogee, i.inclination, i.period,
                                     i.semimajor, i.rcs, i.launch, i.decay, i.source, i.site, i.note,
                                     orbel.satnum);
