@@ -151,8 +151,6 @@ class MapComponent extends EventEmitter {
   render(traces) {
     for (let satnum in traces) {
       let gpoints = traces[satnum].map(p => gLatLngDeg(p));
-      console.log('satnum = ' + satnum);
-      console.log(gpoints);
       let path = this.createPath(gpoints);
       this.showPath(path);
     }
