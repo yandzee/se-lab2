@@ -2,7 +2,7 @@
 
 const co = require('co');
 
-const Searcher = require('./searcher');
+const { Searcher } = require('./searcher');
 const Server = require('./server');
 
 co(function* () {

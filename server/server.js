@@ -4,6 +4,32 @@ const fs = require('fs');
 const path = require('path');
 const koa = require('koa');
 
+const { NoSuchSatelliteError } = require('./searcher');
+
+class QueryParamError extends Error {
+  constructor() {
+    super(`Invalid value of param`);
+  }
+}
+
+function check(rule) {
+  return (str, def) => {
+    if (str == null && def != null)
+      return def;
+
+    let val = Number(str || NaN);
+
+    if (Number.isSafeInteger(val) && rule(val))
+      return val;
+    else
+      throw new QueryParamError;
+  };
+}
+
+check.integer = check(_ => true);
+check.unsigned = check(v => 0 <= v);
+check.positive = check(v => 1 <= v);
+
 class Server {
   constructor(searcher) {
     let app = this.app = koa();
@@ -11,10 +37,13 @@ class Server {
     app.context.searcher = searcher;
 
     app.use(this.logger);
+
+    app.use(this.checker);
     app.use(this.satellites);
     app.use(this.info);
     app.use(this.period);
     app.use(this.revol);
+
     app.use(this.file);
   }
 
@@ -24,6 +53,7 @@ class Server {
 
   /*
    * Middlewares.
+   * `this` refers to koa context.
    */
 
   *logger(next) {
@@ -31,6 +61,20 @@ class Server {
     yield* next;
     let ms = Date.now() - start;
     console.log('%s %s - %sms', this.method, this.url, ms);
+  }
+
+  *checker(next) {
+    try {
+      yield* next;
+    } catch (ex) {
+      if (ex instanceof QueryParamError || ex instanceof NoSuchSatelliteError) {
+        this.status = 422;
+        this.message = ex.message;
+        return;
+      }
+
+      throw ex;
+    }
   }
 
   *satellites(next) {
@@ -45,23 +89,8 @@ class Server {
     if (this.path !== '/info')
       return yield* next;
 
-    let satnum = +(this.query.satnum || NaN);
-
-    if (!Number.isSafeInteger(satnum)) {
-      this.status = 422;
-      return;
-    }
-
-    let info;
-    try {
-      info = yield* this.searcher.info(satnum);
-    } catch (ex) {
-      if (!/no such/i.test(ex.message))
-        throw ex;
-
-      this.status = 422;
-      return;
-    }
+    let satnum = check.positive(this.query.satnum);
+    let info = yield* this.searcher.info(satnum);
 
     this.type = 'json';
     this.body = info;
@@ -71,27 +100,12 @@ class Server {
     if (this.path !== '/period')
       return yield* next;
 
-    let asNum = str => +(str || NaN);
-    let satnum = asNum(this.query.satnum);
-    let ts0 = asNum(this.query.ts0);
-    let ts1 = asNum(this.query.ts1) || Date.now();
+    let q = this.query;
+    let satnum = check.positive(q.satnum);
+    let ts0 = check.integer(q.ts0);
+    let ts1 = check.integer(q.ts1, Date.now());
 
-    let allAreSafe = [satnum, ts0, ts1].every(Number.isSafeInteger);
-    if (!allAreSafe || satnum < 0) {
-      this.status = 422;
-      return;
-    }
-
-    let result;
-    try {
-      result = yield* this.searcher.period(satnum, ts0, ts1);
-    } catch (ex) {
-      if (!/no such/i.test(ex.message))
-        throw ex;
-
-      this.status = 422;
-      return;
-    }
+    let result = yield* this.searcher.period(satnum, ts0, ts1);
 
     this.type = 'json';
     this.body = result;
@@ -101,27 +115,12 @@ class Server {
     if (this.path !== '/revol')
       return yield* next;
 
-    let asNum = str => +(str || NaN);
-    let satnum = asNum(this.query.satnum);
-    let ts = asNum(this.query.ts) || Date.now();
-    let nrevs = asNum(this.query.nrevs) || 1;
+    let q = this.query;
+    let satnum = check.positive(q.satnum);
+    let ts = check.integer(q.ts, Date.now());
+    let nrevs = check.positive(q.nrevs, 1);
 
-    let allAreSafe = [satnum, ts, nrevs].every(Number.isSafeInteger);
-    if (!allAreSafe || satnum < 0 || nrevs < 1) {
-      this.status = 422;
-      return;
-    }
-
-    let result;
-    try {
-      result = yield* this.searcher.revolutions(satnum, ts, nrevs);
-    } catch (ex) {
-      if (!/no such/i.test(ex.message))
-        throw ex;
-
-      this.status = 422;
-      return;
-    }
+    let result = yield* this.searcher.revolutions(satnum, ts, nrevs);
 
     this.type = 'json';
     this.body = result;

@@ -2,6 +2,13 @@
 
 const sqlite3 = require('co-sqlite3');
 
+class NoSuchSatelliteError extends Error {
+  constructor(satnum) {
+    super(`No such satellite: ${satnum}`);
+    this.satnum = satnum;
+  }
+}
+
 class Searcher {
   *connect(dbname) {
     let db = this.db = yield sqlite3(dbname);
@@ -27,7 +34,7 @@ class Searcher {
   *info(satnum) {
     let info = yield this.sql.selectInfo.get(satnum);
     if (!info)
-      throw new Error('No such satellite');
+      throw new NoSuchSatelliteError(satnum);
 
     for (let key in info)
       if (info[key] == null)
@@ -40,7 +47,7 @@ class Searcher {
     if (timestamp == null) {
       let result = yield this.sql.selectRecent.get(satnum);
       if (!result.satnum)
-        throw new Error('No such satellite');
+        throw new NoSuchSatelliteError(satnum);
 
       return result;
     }
@@ -51,7 +58,7 @@ class Searcher {
       if (candidates[0].satnum)
         return candidates[0];
       else
-        throw new Error('No such satellite');
+        throw new NoSuchSatelliteError(satnum);
     }
 
     if (!candidates[0].satnum || !candidates[1].satnum)
@@ -89,4 +96,5 @@ class Searcher {
   }
 }
 
-module.exports = Searcher;
+exports.Searcher = Searcher;
+exports.NoSuchSatelliteError = NoSuchSatelliteError;
