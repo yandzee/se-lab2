@@ -20,11 +20,10 @@ html, body {
 }
 
 .bottom-first-column {
-  /*border: 1px solid purple;*/
+/*  border: 1px solid purple;*/
   border-top: 1px solid lightgray;
-  overflow: hidden;
   height: 40%;
-  overflow: hidden;
+  overflow: scroll;
 }
 
 .second-column {
@@ -47,4 +46,8 @@ html, body {
 
 #google-map {
   margin-top: 20px;
+}
+
+#info-component {
+  padding: 15px;
 }

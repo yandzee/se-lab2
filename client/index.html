@@ -14,12 +14,30 @@
       <script src="fetcher.js"></script>
       <script src="list.js"></script>
       <script src="map.js"></script>
+      <script src="info.js"></script>
       <script src="index.js" defer></script>
 
       <script type="text/html" id="list-elem-template">
         <tr data-satnum="<%satnum%>">
           <td class="title-column"><%title%></td><td><%satnum%></td>
         </tr>
+      </script>
+
+      <script type="text/html" id="sat-info-template">
+        <table class="table table-condensed">
+          <tr><td><b>NORAD ID</b></td><td><%satnum%></td></tr>
+          <tr><td><b>Int'l Code</b></td><td><%intl%></td></tr>
+          <tr><td><b>Perigee</b></td><td><%perigee%> km</td></tr>
+          <tr><td><b>Apogee</b></td><td><%apogee%> km</td></tr>
+          <tr><td><b>Inclination</b></td><td><%inclination%> °</td></tr>
+          <tr><td><b>Period</b></td><td><%period%> minutes</td></tr>
+          <tr><td><b>Semi major axis</b></td><td><%semimajor%> km</td></tr>
+          <tr><td><b>RCS</b></td><td><%rcs%> m<sup>2</sup></td></tr>
+          <tr><td><b>Launch date</b></td><td><%launch%></td></tr>
+          <tr><td><b>Source</b></td><td><%source%></td></tr>
+          <tr><td><b>Launch site</b></td><td><%site%></td></tr>
+          <tr><td><b>Note</b></td><td><%note%></td></tr>
+        </table>
       </script>
   </head>
   <body>  
@@ -33,10 +51,10 @@
             <thead>
               <tr>
                 <td class="title-column">
-                  <input class="form-control input-sm" placeholder="Title" id="title-filter">
+                  <input class="form-control input-xs" placeholder="Title (re)" id="title-filter">
                 </td>
                 <td>
-                  <input class="form-control input-sm" placeholder="ID" id="id-filter">
+                  <input class="form-control input-xs" placeholder="ID (re)" id="id-filter">
                 </td>
               </tr>
               <tr>
@@ -62,21 +80,22 @@
     <div class="second-column">
       <div id="map-component">
         <h3>Map</h3>
-        <form class="form-inline">
-          <div class="form-group">
-            <label>Since </label>
-            <input class="form-control" type="date" id="since-date">
-          </div>
-          <div class="form-group">
-            <label>Until </label>
-            <input class="form-control" type="date" id="until-date">
-          </div>
-          <div class="form-group">
-            <label>Revolutions:</label>
-            <input class="form-control" type="number" value=1 id="revol-amount">
-          </div>
-          <button class="btn btn-primary" id="show-btn">Show</button>
-        </form>
+        <table class="table table-condensed map-table">
+          <tr>
+            <td style="width: 60px;"><label>Since</label></td>
+            <td style="width: 150px;"><input class="form-control" type="datetime-local" id="since-date"></td>
+            <td style="width: 60px;"><label>Until </label></td>
+            <td style="width: 150px; "><input class="form-control" type="datetime-local" id="until-date"></td>
+            <td><button class="btn btn-primary" id="show-period-btn">Show</button></td>
+          </tr>
+          <tr>
+            <td><label>Date</label></td>
+            <td><input class="form-control" type="datetime-local" id="certain-date"></td>
+            <td><label>Revolutions:</label></td>
+            <td><input class="form-control" type="number" value=1 id="revol-amount"></td>
+            <td><button class="btn btn-primary" id="show-certain-btn">Show</button></td>
+          </tr>
+        </table>
         <div id="google-map" style='width: 800px; height: 600px;'>
         </div>
       </div>
