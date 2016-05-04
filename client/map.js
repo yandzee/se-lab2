@@ -13,10 +13,10 @@ class MapComponent extends EventEmitter {
     this.showCertainBtn = $mapComponent.find('#show-certain-btn');
 
     let now = new Date();
-    this.sinceInput.setDate(now);
-    this.certainInput.setDate(now);
+    this.sinceInput.val(now.toISOString().slice(0, 19));
+    this.certainInput.val(now.toISOString().slice(0, 19));
     now.setHours(now.getHours() + 2);
-    this.untilInput.setDate(now);
+    this.untilInput.val(now.toISOString().slice(0, 19));
 
     this.since = new Date(this.sinceInput.val());
     this.until = new Date(this.untilInput.val());
@@ -32,6 +32,7 @@ class MapComponent extends EventEmitter {
       zoom: 1,
     });
     this.paths = [];
+    this.markers = [];
   }
 
   createPath(points) {
@@ -47,6 +48,17 @@ class MapComponent extends EventEmitter {
       strokeWeight: 2,
     });
     return path;
+  }
+
+  satelliteMarker(pos) {
+    return new google.maps.Marker({
+      position: pos,
+      map: this.map,
+      icon: {
+        url: '/saticon.png',
+        size: new google.maps.Size(30, 30),
+      },
+    });
   }
 
   makeHandlers() {
@@ -94,6 +106,18 @@ class MapComponent extends EventEmitter {
     }
   }
 
+  satelliteIcon(orbs, ts0, ts1) {
+    let now = new Date().getTime();
+    if (now < ts0 || now > ts1) return;
+    console.log('in satelliteIcon');
+    let closest = this.closest(orbs, now);
+    let point = this.coords(closest, now);
+    let pos = gLatLngDeg(point);
+    let marker = this.satelliteMarker(pos);
+    this.markers.push(marker);
+    marker.setMap(this.map);
+  }
+
   periodTraces() {
     this.clearMap();
 
@@ -103,9 +127,10 @@ class MapComponent extends EventEmitter {
 
     let promises = [];
     for (let sat of this.activeSatallites) {
-      let p = fetcher.fetchPeriod(sat, ts0, ts1).then(orbs =>
-        this.propagateAll(sat, orbs, traces, ts0, ts1)
-      );
+      let p = fetcher.fetchPeriod(sat, ts0, ts1).then(orbs => {
+        this.propagateAll(sat, orbs, traces, ts0, ts1);
+        this.satelliteIcon(orbs, ts0, ts1);
+      });
       promises.push(p);
     }
 
@@ -118,15 +143,18 @@ class MapComponent extends EventEmitter {
     let ts = this.certainDate.getTime();
     let nrevs = this.nrevs;
     let traces = {};
+    let now = new Date().getTime();
 
     Promise.all(this.activeSatallites.map(sat =>
       fetcher.fetchRevolutions(sat, ts, nrevs).then(orbs => {
+        console.log(orbs);
         let orbsInDay = orbs[0].no;
         let window = 24 * 3600 * 1000 * nrevs / orbsInDay / 1.99;
         let ts0 = ts - window;
         let ts1 = ts + window;
 
         this.propagateAll(sat, orbs, traces, ts0, ts1);
+        this.satelliteIcon(orbs, ts0, ts1);
       })
     )).then(_ => this.render(traces));
   }
@@ -164,7 +192,11 @@ class MapComponent extends EventEmitter {
   clearMap() {
     for (let path of this.paths)
       path.setMap(null);
+    for (let marker of this.markers)
+      marker.setMap(null);
+
     this.paths = [];
+    this.markers = [];
   }
 
   closest(orbs, ts) {
