@@ -93,29 +93,13 @@ class MapComponent extends EventEmitter {
   }
 
   propagateAll(sat, orbs, traces, ts0, ts1) {
-    let prevClosest = null;
     let step = (ts1 - ts0) / 50;
     traces[sat] = [];
     for (let ts = ts0; ts <= ts1; ts += step) {
       let closest = this.closest(orbs, ts);
-      if (closest !== prevClosest)
-        satellite.prepareSatrec(closest);
-      let point = this.coords(closest, ts);
+      let point = closest.predict(ts);
       traces[sat].push(point);
-      prevClosest = closest;
     }
-  }
-
-  satelliteIcon(orbs, ts0, ts1) {
-    let now = new Date().getTime();
-    if (now < ts0 || now > ts1) return;
-    console.log('in satelliteIcon');
-    let closest = this.closest(orbs, now);
-    let point = this.coords(closest, now);
-    let pos = gLatLngDeg(point);
-    let marker = this.satelliteMarker(pos);
-    this.markers.push(marker);
-    marker.setMap(this.map);
   }
 
   periodTraces() {
@@ -127,7 +111,7 @@ class MapComponent extends EventEmitter {
 
     let promises = [];
     for (let sat of this.activeSatallites) {
-      let p = fetcher.fetchPeriod(sat, ts0, ts1).then(orbs => {
+      let p = Satellite.get(sat).period(ts0, ts1).then(orbs => {
         this.propagateAll(sat, orbs, traces, ts0, ts1);
         this.satelliteIcon(orbs, ts0, ts1);
       });
@@ -146,34 +130,36 @@ class MapComponent extends EventEmitter {
     let now = new Date().getTime();
 
     Promise.all(this.activeSatallites.map(sat =>
-      fetcher.fetchRevolutions(sat, ts, nrevs).then(orbs => {
-        console.log(orbs);
+      // fetcher.fetchRevolutions(sat, ts, nrevs).then(orbs => {
+      //   console.log(orbs);
+        // let orbsInDay = orbs[0].no;
+        // let window = 24 * 3600 * 1000 * nrevs / orbsInDay / 1.99;
+        // let ts0 = ts - window;
+        // let ts1 = ts + window;
+
+        // this.propagateAll(sat, orbs, traces, ts0, ts1);
+        // this.satelliteIcon(orbs, ts0, ts1);
+      // })
+      Satellite.get(sat).revols(ts, nrevs).then(orbs => {
         let orbsInDay = orbs[0].no;
         let window = 24 * 3600 * 1000 * nrevs / orbsInDay / 1.99;
         let ts0 = ts - window;
         let ts1 = ts + window;
-
         this.propagateAll(sat, orbs, traces, ts0, ts1);
         this.satelliteIcon(orbs, ts0, ts1);
       })
     )).then(_ => this.render(traces));
   }
 
-  coords(point, ts) {
-    let date = new Date(ts);
-    let dateProps = [
-      date.getUTCFullYear(),
-      date.getUTCMonth() + 1,
-      date.getUTCDate(),
-      date.getUTCHours(),
-      date.getUTCMinutes(),
-      date.getUTCSeconds(),
-    ];
-    let posAndVel = satellite.propagate(point, ...dateProps);
-    let gmst = satellite.gstimeFromDate(...dateProps);
-    console.log(posAndVel.position);
-    let posGeodetic = satellite.eciToGeodetic(posAndVel.position, gmst);
-    return posGeodetic;
+  satelliteIcon(orbs, ts0, ts1) {
+    let now = new Date().getTime();
+    if (now < ts0 || now > ts1) return;
+    let closest = this.closest(orbs, now);
+    let point = closest.predict(now);
+    let pos = gLatLngDeg(point);
+    let marker = this.satelliteMarker(pos);
+    this.markers.push(marker);
+    marker.setMap(this.map);
   }
 
   render(traces) {
@@ -200,19 +186,21 @@ class MapComponent extends EventEmitter {
   }
 
   closest(orbs, ts) {
-    let cl = orbs[0];
-    let minTsDiff = Math.abs(ts - cl.timestamp);
+    // let cl = orbs[0];
+    // let minTsDiff = Math.abs(ts - cl.timestamp);
 
-    for (let point of orbs) {
-      let ots = point.timestamp;
-      let tsDiff = Math.abs(ts - ots);
-      if (tsDiff < minTsDiff) {
-        cl = point;
-        minTsDiff = tsDiff;
-      }
-    }
+    // for (let point of orbs) {
+    //   let ots = point.timestamp;
+    //   let tsDiff = Math.abs(ts - ots);
+    //   if (tsDiff < minTsDiff) {
+    //     cl = point;
+    //     minTsDiff = tsDiff;
+    //   }
+    // }
 
-    return cl;
+    // return cl;
+    return orbs.reduce((o1, o2) => 
+      o2.timeDist(ts) < o1.timeDist(ts) ? o2 : o1);
   }
 
   showSatellite(satnum) {

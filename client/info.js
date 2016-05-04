@@ -16,7 +16,6 @@ class InfoComponent extends EventEmitter {
   }
 
   showLast(satnum) {
-    console.log('in showLast, satnum = ' + satnum);
     let s = this.info.indexOf(satnum);
     if (s !== -1)
       this.info.splice(s, 1);
@@ -29,7 +28,7 @@ class InfoComponent extends EventEmitter {
 
   displayInfo(satnum) {
     let nullchk = (v, fv) => v == null ? '-' : (fv == null ? v : fv);
-    fetcher.fetchInfo(satnum).then(info => {
+    Satellite.get(satnum).info().then(info => {
       info.satnum = satnum;
       info.intl = nullchk(info.intl);
       info.perigee = nullchk(info.perigee);

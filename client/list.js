@@ -9,7 +9,9 @@ class ListComponent extends EventEmitter {
     this.titleFilter = $listDiv.find('#title-filter');
     this.idFilter = $listDiv.find('#id-filter');
 
-    this.fetchData().then(() => {
+    Satellite.load().then(satellites => {
+      this.makeTable(satellites);
+      this.setTableHandlers();
       this.makeFilters();
     });
   }
@@ -32,7 +34,7 @@ class ListComponent extends EventEmitter {
                   .addClass('hide');
       };
 
-      return throttle(handler, 400);
+      return throttle(handler, 150);
     };
 
     $tFilter.keyup(filterHandler($titles));
@@ -44,14 +46,6 @@ class ListComponent extends EventEmitter {
       let html = tmpl('list-elem-template');
       this.table.append($(html(sat)));
     }
-
-    this.setTableHandlers();
-  }
-
-  fetchData() {
-    return fetcher.fetchSatellites().then(satellites => {
-      this.makeTable(satellites);
-    });
   }
 
   setTableHandlers() {
@@ -69,10 +63,6 @@ class ListComponent extends EventEmitter {
 
       return false;
     });
-  }
-
-  addElem(elem) {
-    this.elems.push(elem);
   }
 
   addSelected(elem) {
