@@ -74,10 +74,13 @@ class Grabber {
       try {
         yield* this.processTLE(tle);
       } catch (ex) {
-        console.error(`Error while processing TLE from ${fetcher.info}: ${ex.message}`);
-        console.error('~'.repeat(50));
-        console.error(tle);
-        console.error('~'.repeat(50));
+        if (ex instanceof extractor.InvalidTLEError) {
+          console.error(`Error while processing TLE from ${fetcher.info}: ${ex.message}`);
+          console.error('~'.repeat(50));
+          console.error(ex.tle);
+          console.error('~'.repeat(50));
+        } else
+          throw ex;
       }
     }
 
@@ -85,7 +88,7 @@ class Grabber {
   }
 
   *processTLE(tle) {
-    let orbel = extractor.parse(tle);
+    let orbel = extractor.parseTLE(tle);
 
     yield [
       this.addSatelliteIfNeeded(orbel),

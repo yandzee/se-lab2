@@ -1,6 +1,6 @@
 'use strict';
 
-const satellite = require('satellite.js').satellite;
+const { satellite } = require('satellite.js');
 
 function checkStats(stats) {
   for (let stat in stats)
@@ -16,7 +16,14 @@ function calcTimestamp(eyear, edays) {
   return Math.round(ms);
 }
 
-exports.parse = function (tle) {
+class InvalidTLEError extends Error {
+  constructor(message, tle) {
+    super(message);
+    this.tle = tle;
+  }
+}
+
+function parseTLE(tle) {
   let lines = tle.split('\n');
 
   let title = '';
@@ -28,13 +35,13 @@ exports.parse = function (tle) {
   } else if (lines.length === 2)
     stats = satellite.parseTwoline(lines[0], lines[1]);
   else
-    throw new Error('Invalid number of lines');
+    throw new InvalidTLEError('Invalid number of lines', tle);
 
   delete stats.ndot;
   delete stats.nddot;
 
   if (!checkStats(stats))
-    throw new Error('Bad values');
+    throw new InvalidTLEError('Bad values', tle);
 
   let timestamp = calcTimestamp(stats.epochyr, stats.epochdays);
 
@@ -43,3 +50,6 @@ exports.parse = function (tle) {
 
   return stats;
 };
+
+exports.parseTLE = parseTLE;
+exports.InvalidTLEError = InvalidTLEError;
