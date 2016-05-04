@@ -47,14 +47,18 @@ function tmpl(id) {
   return new Function('__obj', code);
 }
 
-function throttle(f, ms) {
+let throttle = (f, ms) => {
   let timerId;
-  let _this = this;
 
   let wrapper = (...args) => {
     clearTimeout(timerId);
-    timerId = setTimeout(() => f.apply(_this, args), ms);
+    timerId = setTimeout(() => f.apply(this, args), ms);
   };
 
   return wrapper;
+};
+
+function randInt(min, max) {
+  return Math.round(min - 0.5 + Math.random() * (max - min + 1));
 }
+
