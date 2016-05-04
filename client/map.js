@@ -4,19 +4,23 @@ class MapComponent extends EventEmitter {
   constructor($mapComponent) {
     super();
     this.activeSatallites = [];
-    this.fetcher = new Fetcher();
 
     this.sinceInput = $mapComponent.find('#since-date');
     this.untilInput = $mapComponent.find('#until-date');
+    this.certainInput = $mapComponent.find('#certain-date');
     this.revolInput = $mapComponent.find('#revol-amount');
-    this.showButton = $mapComponent.find('#show-btn');
+    this.showPeriodBtn = $mapComponent.find('#show-period-btn');
+    this.showCertainBtn = $mapComponent.find('#show-certain-btn');
 
     let now = new Date();
-    this.untilInput.prop('valueAsDate', now);
-    this.sinceInput.prop('valueAsDate', now.setDate(now.getDate() - 1));
+    this.sinceInput.setDate(now);
+    this.certainInput.setDate(now);
+    now.setHours(now.getHours() + 2);
+    this.untilInput.setDate(now);
 
     this.since = new Date(this.sinceInput.val());
     this.until = new Date(this.untilInput.val());
+    this.certain = new Date(this.certainInput.val());
 
     this.initMap();
     this.makeHandlers();
@@ -32,7 +36,8 @@ class MapComponent extends EventEmitter {
 
   createPath(points) {
     let colors = ['#ff0000', '#00ff00', '#0000ff', '#008080', '#ffd700',
-                  '#800080', '#f6546a', '#40e0d0', '#3b5998', '#8b0000', ];
+                  '#800080', '#f6546a', '#40e0d0', '#3b5998', '#8b0000',
+                  ];
 
     let path = new google.maps.Polyline({
       path: points,
@@ -45,57 +50,84 @@ class MapComponent extends EventEmitter {
   }
 
   makeHandlers() {
-    let $showButton = this.showButton;
+    let $showPeriodBtn = this.showPeriodBtn;
+    let $showCertainBtn = this.showCertainBtn;
     let $sinceInput = this.sinceInput;
     let $revolInput = this.revolInput;
     let $untilInput = this.untilInput;
+    let $certainInput = this.certainInput;
 
-    $showButton.click(e => {
+    $showPeriodBtn.click(e => {
+      e.preventDefault();
       let since = new Date($sinceInput.val());
       let until = new Date($untilInput.val());
-      if (until - since < 0) return; // TODO: show error
-      let nrevs = $untilInput.val();
+      if (until - since < 0) return;
       this.since = since;
       this.until = until;
+
+      this.periodTraces();
+    });
+
+    $showCertainBtn.click(e => {
+      e.preventDefault();
+      let date = new Date($certainInput.val());
+      let nrevs = $revolInput.val();
+
+      this.certainDate = date;
       this.nrevs = nrevs;
 
-      this.updateTraces();
+      this.dateRevsTraces();
     });
   }
 
-  fetchRevolutions(satnum, ts, nrevs) {
-    return this.fetcher.fetchRevolutions(satnum, ts, nrevs);
+  propagateAll(sat, orbs, traces, ts0, ts1) {
+    let prevClosest = null;
+    let step = (ts1 - ts0) / 50;
+    traces[sat] = [];
+    for (let ts = ts0; ts <= ts1; ts += step) {
+      let closest = this.closest(orbs, ts);
+      if (closest !== prevClosest)
+        satellite.prepareSatrec(closest);
+      let point = this.coords(closest, ts);
+      traces[sat].push(point);
+      prevClosest = closest;
+    }
   }
 
-  fetchSatTrace(sat, since, until, step, nrevs, traces) {
+  periodTraces() {
+    this.clearMap();
+
+    let ts0 = this.since.getTime();
+    let ts1 = this.until.getTime();
+    let traces = {};
+
     let promises = [];
-    traces[sat] = [];
-    for (let ts = since; ts <= until; ts += step) {
-      let p = this.fetchRevolutions(sat, ts, nrevs).then(orbs => {
-        let closest = this.closest(orbs, ts);
-        let point = this.coords(closest, ts);
-        traces[sat].push(point);
-      });
+    for (let sat of this.activeSatallites) {
+      let p = fetcher.fetchPeriod(sat, ts0, ts1).then(orbs =>
+        this.propagateAll(sat, orbs, traces, ts0, ts1)
+      );
       promises.push(p);
     }
 
-    return Promise.all(promises).then(_ => {
-      traces[sat].sort((a, b) => a.timestamp > b.timestamp);
-    });
+    Promise.all(promises).then(_ => this.render(traces));
   }
 
-  updateTraces() {
-    if (this.activeSatallites.length === 0)
-      return this.clearMap();
+  dateRevsTraces() {
+    this.clearMap();
 
-    let since = this.since.getTime();
-    let until = this.until.getTime();
+    let ts = this.certainDate.getTime();
     let nrevs = this.nrevs;
     let traces = {};
-    let step = (until - since) / 50; // which step?
 
     Promise.all(this.activeSatallites.map(sat =>
-      this.fetchSatTrace(sat, since, until, step, nrevs, traces)
+      fetcher.fetchRevolutions(sat, ts, nrevs).then(orbs => {
+        let orbsInDay = orbs[0].no;
+        let window = 24 * 3600 * 1000 * nrevs / orbsInDay / 1.99;
+        let ts0 = ts - window;
+        let ts1 = ts + window;
+
+        this.propagateAll(sat, orbs, traces, ts0, ts1);
+      })
     )).then(_ => this.render(traces));
   }
 
@@ -109,16 +141,16 @@ class MapComponent extends EventEmitter {
       date.getUTCMinutes(),
       date.getUTCSeconds(),
     ];
-    satellite.prepareSatrec(point);
     let posAndVel = satellite.propagate(point, ...dateProps);
     let gmst = satellite.gstimeFromDate(...dateProps);
+    console.log(posAndVel.position);
     let posGeodetic = satellite.eciToGeodetic(posAndVel.position, gmst);
     return posGeodetic;
   }
 
   render(traces) {
     for (let satnum in traces) {
-      let gpoints = traces[satnum].map(p => ({ lat: p.latitude, lng: p.longitude }));
+      let gpoints = traces[satnum].map(p => gLatLngDeg(p));
       console.log('satnum = ' + satnum);
       console.log(gpoints);
       let path = this.createPath(gpoints);
@@ -136,46 +168,6 @@ class MapComponent extends EventEmitter {
       path.setMap(null);
     this.paths = [];
   }
-
-  // render(orbs) {
-  //   let orb = orbs[orbs.length - 1];
-  //   let step = .1 * 60 * 60 * 1000;
-  //   let n = 20;
-  //   let data = [];
-  //   let ts = Date.now();
-  //   try {
-  //     while (n-- > 0) {
-  //       let prop = this.propagate(orb, new Date(ts));
-  //       data.push(prop);
-  //       ts -= step;
-  //     }
-  //   } catch (_) { }
-
-  //   console.log(data);
-  // }
-
-  // propagate(orb, date) {
-  //   satellite.prepareSatrec(orb);
-  //   let positionAndVelocity = satellite.propagate(
-  //       orb,
-  //       date.getUTCFullYear(),
-  //       date.getUTCMonth() + 1,
-  //       date.getUTCDate(),
-  //       date.getUTCHours(),
-  //       date.getUTCMinutes(),
-  //       date.getUTCSeconds()
-  //   );
-  //   let gmst = satellite.gstimeFromDate(
-  //       date.getUTCFullYear(),
-  //       date.getUTCMonth() + 1,
-  //       date.getUTCDate(),
-  //       date.getUTCHours(),
-  //       date.getUTCMinutes(),
-  //       date.getUTCSeconds()
-  //   );
-  //   let positionGd = satellite.eciToGeodetic(positionAndVelocity.position, gmst);
-  //   return positionGd;
-  // }
 
   closest(orbs, ts) {
     let cl = orbs[0];
@@ -196,8 +188,6 @@ class MapComponent extends EventEmitter {
   showSatellite(satnum) {
     if (this.activeSatallites.indexOf(satnum) === -1) {
       this.activeSatallites.push(satnum);
-      console.log('activeSatallites: ', this.activeSatallites);
-      this.updateTraces();
     }
   }
 
@@ -205,12 +195,6 @@ class MapComponent extends EventEmitter {
     let ri = this.activeSatallites.indexOf(satnum);
     if (ri !== -1) {
       this.activeSatallites.splice(ri, 1);
-      console.log('activeSatallites: ', this.activeSatallites);
-      this.updateTraces();
     }
-  }
-
-  setRevolutions(newRevCount) {
-    this.revCount = newRevCount;
   }
 }
