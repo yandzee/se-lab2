@@ -9,19 +9,22 @@ class InfoComponent extends EventEmitter {
 
   showInfo(satnum) {
     let s = this.info.indexOf(satnum);
-    if (s !== -1)
+    if (s === -1)
       this.info.push(satnum);
 
     this.displayInfo(satnum);
   }
 
   showLast(satnum) {
+    console.log('in showLast, satnum = ' + satnum);
     let s = this.info.indexOf(satnum);
     if (s !== -1)
       this.info.splice(s, 1);
     let l = this.info.length;
     if (l !== 0)
       this.displayInfo(this.info[l - 1]);
+    else
+      this.infoDiv.html('Satellite info');
   }
 
   displayInfo(satnum) {
