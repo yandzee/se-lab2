@@ -38,5 +38,8 @@ exports.parse = function (tle) {
 
   let timestamp = calcTimestamp(stats.epochyr, stats.epochdays);
 
-  return { title, timestamp, stats };
+  stats.title = title;
+  stats.timestamp = timestamp;
+
+  return stats;
 };
