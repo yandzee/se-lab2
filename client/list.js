@@ -49,8 +49,7 @@ class ListComponent extends EventEmitter {
   }
 
   fetchData() {
-    let f = new Fetcher();
-    return f.fetchSatellites().then(satellites => {
+    return fetcher.fetchSatellites().then(satellites => {
       this.makeTable(satellites);
     });
   }
