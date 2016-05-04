@@ -12,6 +12,7 @@ class Server {
 
     app.use(this.logger);
     app.use(this.satellites);
+    app.use(this.info);
     app.use(this.period);
     app.use(this.revol);
     app.use(this.file);
@@ -38,6 +39,32 @@ class Server {
 
     this.type = 'json';
     this.body = yield* this.searcher.satellites();
+  }
+
+  *info(next) {
+    if (this.path !== '/info')
+      return yield* next;
+
+    let satnum = +(this.query.satnum || NaN);
+
+    if (!Number.isSafeInteger(satnum)) {
+      this.status = 422;
+      return;
+    }
+
+    let info;
+    try {
+      info = yield* this.searcher.info(satnum);
+    } catch (ex) {
+      if (!/no such/i.test(ex.message))
+        throw ex;
+
+      this.status = 422;
+      return;
+    }
+
+    this.type = 'json';
+    this.body = info;
   }
 
   *period(next) {
