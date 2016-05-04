@@ -3,11 +3,24 @@
 const sqlite3 = require('co-sqlite3');
 
 const extractor = require('./extractor');
+const infoFetcher = require('./info_fetcher');
 
 const tables = [
   `satellite(
-    satnum integer not null primary key,
-    title  text
+    satnum      integer not null primary key,
+    title       text,
+    intl        text,
+    perigee     real,
+    apogee      real,
+    inclination real,
+    period      real,
+    semimajor   real,
+    rcs         real,
+    launch      integer,
+    decay       integer,
+    source      text,
+    site        text
+    note        text
   ) without rowid`,
 
   `orbelement(
@@ -40,12 +53,18 @@ class Grabber {
                                     orbelement(satnum, timestamp, epochyr, epochdays,
                                                bstar, inclo, nodeo, ecco, argpo, mo, no)
                                     values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`),
+      selectLaunch: db.prepare(`select launch from satellite where satnum = ?`),
+      updateInfo: db.prepare(`update satellite set intl = ?, perigee = ?, apogee = ?,
+                                                   inclination = ?, period = ?, semimajor = ?,
+                                                   rcs = ?, launch = ?, decay = ?, source = ?,
+                                                   site = ?, note = ?
+                              where satnum = ?`),
     };
   }
 
   *grab(fetcher) {
+    console.log(`Fetching from ${fetcher.info}...`);
     let tles = yield* fetcher.fetch();
-
     console.log(`Fetched ${tles.length} from ${fetcher.info}.`);
 
     // FIXME: transactions complicate parallelism.
@@ -66,14 +85,33 @@ class Grabber {
   }
 
   *processTLE(tle) {
-    let satellite = extractor.parse(tle);
-    let st = satellite.stats;
+    let orbel = extractor.parse(tle);
 
     yield [
-      this.sql.insertSatellite.run(st.satnum, satellite.title),
-      this.sql.insertOrbelement.run(st.satnum, satellite.timestamp, st.epochyr, st.epochdays,
-                                    st.bstar, st.inclo, st.nodeo, st.ecco, st.argpo, st.mo, st.no),
+      this.addSatelliteIfNeeded(orbel),
+      this.addOrbelement(orbel),
     ];
+  }
+
+  *addSatelliteIfNeeded(orbel) {
+    let row = yield this.sql.selectLaunch.get(orbel.satnum);
+
+    if (!row)
+      yield this.sql.insertSatellite.run(orbel.satnum, orbel.title);
+
+    if (!row || row.launch == null) {
+      console.log(`Fetching info for ${orbel.satnum}...`);
+      let i = yield* infoFetcher.fetchInfo(orbel.satnum);
+      yield this.sql.updateInfo.run(i.intl, i.perigee, i.apogee, i.inclination, i.period,
+                                    i.semimajor, i.rcs, i.launch, i.decay, i.source, i.site, i.note,
+                                    orbel.satnum);
+    }
+  }
+
+  *addOrbelement(orbel) {
+    let o = orbel;
+    yield this.sql.insertOrbelement.run(o.satnum, o.timestamp, o.epochyr, o.epochdays,
+                                        o.bstar, o.inclo, o.nodeo, o.ecco, o.argpo, o.mo, o.no);
   }
 }
 
