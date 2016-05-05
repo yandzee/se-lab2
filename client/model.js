@@ -67,6 +67,7 @@ class OrbElement {
     this.no = orb.no;
     this.prepared = false;
     this.raw = orb;
+    this.satnum = orb.satnum;
   }
 
   timeDist(ts) {

@@ -35,7 +35,6 @@ class InfoComponent extends EventEmitter {
       // });
       return info;
     }).then(info => {
-      console.log(info);
       info.satnum = satnum;
       info.intl = nullchk(info.intl);
       info.perigee = nullchk(info.perigee);
