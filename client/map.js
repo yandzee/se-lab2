@@ -32,6 +32,7 @@ class MapComponent extends EventEmitter {
     this.makeHandlers();
 
     setInterval(() => this.updateMarkers(), 2000);
+    this.showMyPosition();
   }
 
   initMap() {
@@ -67,6 +68,26 @@ class MapComponent extends EventEmitter {
         size: new google.maps.Size(30, 30),
         anchor: { x: 15, y: 15, },
       },
+    });
+  }
+
+  showMyPosition() {
+    if (!navigator.geolocation)
+      return;
+    navigator.geolocation.getCurrentPosition(coords => {
+      this.coords = coords = coords.coords;
+      console.log(coords);
+      let mrk = new google.maps.Marker({
+        position: new google.maps.LatLng(coords.latitude, coords.longitude),
+        map: this.map,
+        icon: {
+          url: '/mypos.png',
+          size: new google.maps.Size(200, 200),
+          scaledSize: new google.maps.Size(26, 26),
+          anchor: { x: 13, y: 13 },
+        },
+      });
+      mrk.setMap(this.map);
     });
   }
 
