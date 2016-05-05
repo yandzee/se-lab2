@@ -24,6 +24,10 @@ function parse(html) {
   return raw;
 }
 
+function parseFloat(str) {
+  return Number.parseFloat(str.replace(',', ''));
+}
+
 function unify(raw) {
   let info = Object.create(null);
 

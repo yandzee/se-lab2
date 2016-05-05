@@ -3,7 +3,7 @@
 const sqlite3 = require('co-sqlite3');
 
 const extractor = require('./extractor');
-const infoFetcher = require('./info_fetcher');
+const informer = require('./informer');
 
 const tables = [
   `satellite(
@@ -74,10 +74,13 @@ class Grabber {
       try {
         yield* this.processTLE(tle);
       } catch (ex) {
-        console.error(`Error while processing TLE from ${fetcher.info}: ${ex.message}`);
-        console.error('~'.repeat(50));
-        console.error(tle);
-        console.error('~'.repeat(50));
+        if (ex instanceof extractor.InvalidTLEError) {
+          console.error(`Error while processing TLE from ${fetcher.info}: ${ex.message}`);
+          console.error('~'.repeat(50));
+          console.error(ex.tle);
+          console.error('~'.repeat(50));
+        } else
+          throw ex;
       }
     }
 
@@ -85,7 +88,7 @@ class Grabber {
   }
 
   *processTLE(tle) {
-    let orbel = extractor.parse(tle);
+    let orbel = extractor.parseTLE(tle);
 
     yield [
       this.addSatelliteIfNeeded(orbel),
@@ -101,7 +104,7 @@ class Grabber {
 
     if (!row || row.launch == null) {
       console.log(`Fetching info for ${orbel.satnum}...`);
-      let i = yield* infoFetcher.fetchInfo(orbel.satnum);
+      let i = yield* informer.fetchInfo(orbel.satnum);
       yield this.sql.updateInfo.run(i.intl, i.perigee, i.apogee, i.inclination, i.period,
                                     i.semimajor, i.rcs, i.launch, i.decay, i.source, i.site, i.note,
                                     orbel.satnum);
