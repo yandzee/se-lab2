@@ -191,7 +191,11 @@ class MapComponent extends EventEmitter {
   }
 
   updateMarkers() {
+    if (!this.satOrbs)
+      return;
     for (let mrk of this.markers) {
+      if (!this.satOrbs[mrk.satnum])
+        continue;
       let closest = this.closest(this.satOrbs[mrk.satnum], Date.now());
       let point = closest.predict(Date.now());
       let pos = gLatLngDeg(point);

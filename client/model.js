@@ -35,13 +35,6 @@ class Satellite {
     );
   }
 
-  azimuth() {
-    return fetcher.fetchAzimuth().then(azData => {
-      azData.startAzCompass = azCompass(azData.startAz);
-      azData.endAzCompass = azCompass(azData.endAz);
-      return azData;
-    });
-  }
   static load() {
     if (Satellite.satellites == null)
       Satellite.satellites = {};
