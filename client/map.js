@@ -179,6 +179,16 @@ class MapComponent extends EventEmitter {
     )).then(_ => this.render(traces));
   }
 
+  createLabel(title, satnum) {
+    let c = document.createElement('div');
+    c.innerHTML = '<strong>' + title + '</strong><br>(' + satnum + ')';
+    let info = new google.maps.InfoWindow({
+      content: c,
+    });
+
+    return info;
+  }
+
   satelliteIcon(orbs, ts0, ts1) {
     let now = new Date().getTime();
     if (now < ts0 || now > ts1) return;
@@ -187,6 +197,10 @@ class MapComponent extends EventEmitter {
     let pos = gLatLngDeg(point);
     let marker = this.satelliteMarker(pos);
     marker.satnum = orbs[0].satnum;
+    let lbl = this.createLabel(Satellite.get(marker.satnum).name, marker.satnum);
+    google.maps.event.addListener(marker, 'click', () => {
+      lbl.open(this.map, marker);
+    });
     this.markers.push(marker);
   }
 
