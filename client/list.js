@@ -23,22 +23,30 @@ class ListComponent extends EventEmitter {
     let $titles = $trs.find('td:nth(0)');
     let $ids = $trs.find('td:nth(1)');
 
-    let filterHandler = $searchSet => {
+    let filterHandler = ($searchSet, preHandle) => {
 
       let handler = e => {
         $trs.removeClass('hide');
-        let re = new RegExp(e.target.value, 'i');
+        let input = e.target.value;
+        input = preHandle(input);
+        
+        let re = new RegExp(input, 'i');
 
         $searchSet.filter((_, elem) => !re.test($(elem).text()))
                   .closest('tr')
                   .addClass('hide');
       };
 
-      return throttle(handler, 150);
+      return throttle(handler, 300);
     };
 
-    $tFilter.keyup(filterHandler($titles));
-    $idFilter.keyup(filterHandler($ids));
+    $tFilter.keyup(filterHandler($titles, input => {
+      input = input.split('').map(c => escapeRegExp(c)).join('.*');
+      input = '.*' + input + '.*';
+      return input;
+    }));
+
+    $idFilter.keyup(filterHandler($ids, input => '.*' + input + '.*'));
   }
 
   makeTable(satellites) {
