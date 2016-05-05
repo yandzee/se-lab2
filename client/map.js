@@ -75,16 +75,13 @@ class MapComponent extends EventEmitter {
     let $certainInput = this.certainInput;
 
     let certainHandler = e => {
-      console.log('in certainInput input handler');
       let date = new Date($certainInput.val());
-      console.log(date);
       this.certainDate = date;
       this.updateTraces = this.dateRevsTraces;
       this.updateTraces();
     };
 
     let revolHandler = e => {
-      console.log('in revolInput input handler');
       let nrevs = parseInt($revolInput.val(), 10);
       nrevs = nrevs == null ? 1 : nrevs;
       this.nrevs = nrevs;
@@ -93,7 +90,6 @@ class MapComponent extends EventEmitter {
     };
 
     let sinceHandler = e => {
-      console.log('in sinceInput input handler');
       let since = new Date($sinceInput.val());
       this.since = since;
       this.updateTraces = this.periodTraces;
@@ -101,7 +97,6 @@ class MapComponent extends EventEmitter {
     };
 
     let untilHandler = e => {
-      console.log('in untilInput input handler');
       let until = new Date($untilInput.val());
       this.until = until;
       this.updateTraces = this.periodTraces;
