@@ -24,17 +24,24 @@ class Satellite {
   }
 
   period(ts0, ts1) {
-    return fetcher.fetchPeriod(this.satnum, ts0, ts1).then(orbs => 
+    return fetcher.fetchPeriod(this.satnum, ts0, ts1).then(orbs =>
       OrbElement.fromOrbs(orbs)
     );
   }
 
   revols(ts, nrevs) {
-    return fetcher.fetchRevolutions(ts, nrevs).then(orbs => {
+    return fetcher.fetchRevolutions(this.satnum, ts, nrevs).then(orbs =>
       OrbElement.fromOrbs(orbs)
-    })
+    );
   }
 
+  azimuth() {
+    return fetcher.fetchAzimuth().then(azData => {
+      azData.startAzCompass = azCompass(azData.startAz);
+      azData.endAzCompass = azCompass(azData.endAz);
+      return azData;
+    });
+  }
   static load() {
     if (Satellite.satellites == null)
       Satellite.satellites = {};
@@ -71,6 +78,7 @@ class OrbElement {
       this.prepared = true;
       satellite.prepareSatrec(this.raw);
     }
+
     return this.coords(ts);
   }
 

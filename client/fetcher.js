@@ -29,10 +29,20 @@ let fetcher = (exports => {
     });
   };
 
+  let fetchAzimuth = (satnum) => {
+    return new Promise((resolve, reject) => {
+      $.get('http://www.n2yo.com/sat/allpassesjson.php', { s: satnum }, data => {
+        let { startAz, startUTC, endAz, endUTC, } = data;
+        resolve({ startAz, startUTC, endAz, endUTC, });
+      });
+    });
+  };
+
   exports.fetchSatellites  = fetchSatellites;
   exports.fetchPeriod      = fetchPeriod;
   exports.fetchRevolutions = fetchRevolutions;
   exports.fetchInfo        = fetchInfo;
+  exports.fetchAzimuth     = fetchAzimuth;
 
   return exports;
 })({});

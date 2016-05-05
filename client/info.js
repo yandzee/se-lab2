@@ -28,7 +28,14 @@ class InfoComponent extends EventEmitter {
 
   displayInfo(satnum) {
     let nullchk = (v, fv) => v == null ? '-' : (fv == null ? v : fv);
-    Satellite.get(satnum).info().then(info => {
+    let sat = Satellite.get(satnum);
+    sat.info().then(info => {
+      // return sat.azimuth().then(az => {
+      //   Object.assign(info, az);
+      // });
+      return info;
+    }).then(info => {
+      console.log(info);
       info.satnum = satnum;
       info.intl = nullchk(info.intl);
       info.perigee = nullchk(info.perigee);
@@ -42,6 +49,24 @@ class InfoComponent extends EventEmitter {
       info.source = nullchk(info.source);
       info.site = nullchk(info.site);
       info.note = nullchk(info.note);
+
+      if (info.startAz == null ||
+          info.startUTC == null ||
+          info.startAzCompass == null)
+        info.startAz = null;
+      else {
+        info.startAz = getLocalDate(info.startUTC) + ' ' + getLocalTime(info.startUTC);
+        info.startAz += '<br>' + startAz + '&deg; ' + info.startAzCompass;
+      }
+
+      if (info.endAz == null ||
+          info.endUTC == null ||
+          info.endAzCompass == null)
+        info.endAz = null;
+      else {
+        info.endAz = getLocalDate(info.endUTC) + ' ' + getLocalTime(info.endUTC);
+        info.endAz += '<br>' + endAz + '&deg; ' + info.endAzCompass;
+      }
 
       let html = tmpl('sat-info-template');
       this.infoDiv.html($(html(info)));
