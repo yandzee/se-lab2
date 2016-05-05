@@ -39,7 +39,7 @@ class MapComponent extends EventEmitter {
     this.markers = [];
   }
 
-  createPath(points) {
+  createPath(points, i) {
     let colors = ['#ff0000', '#00ff00', '#0000ff', '#008080', '#ffd700',
                   '#800080', '#f6546a', '#40e0d0', '#3b5998', '#8b0000',
                   ];
@@ -47,7 +47,7 @@ class MapComponent extends EventEmitter {
     let path = new google.maps.Polyline({
       path: points,
       geodesic: true,
-      strokeColor: colors[randInt(0, colors.length)],
+      strokeColor: colors[i % colors.length],
       strokeOpacity: 1.0,
       strokeWeight: 2,
     });
@@ -183,10 +183,12 @@ class MapComponent extends EventEmitter {
   }
 
   render(traces) {
+    let i = 0;
     for (let satnum in traces) {
       let gpoints = traces[satnum].map(p => gLatLngDeg(p));
-      let path = this.createPath(gpoints);
+      let path = this.createPath(gpoints, i);
       this.showPath(path);
+      ++i;
     }
   }
 
