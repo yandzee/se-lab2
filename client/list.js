@@ -19,43 +19,23 @@ class ListComponent extends EventEmitter {
   makeFilters() {
     let $tFilter = this.titleFilter;
     let $idFilter = this.idFilter;
-    let $trs = this.table.find('tr');
-    let $table = this.table.closest('table');
-    let $titles = $trs.find('td:nth(0)');
-    let $ids = $trs.find('td:nth(1)');
+    let $tbody = $('#satellites');
+    let $prev = $(null);
 
-    let filterHandler = ($searchSet, preHandle) => {
+    let handler = throttle(_ => {
+      if ($prev) $prev.removeClass('selected');
+      let title = $tFilter.val().trim();
+      let id = $idFilter.val().trim();
 
-      let handler = e => {
-        let input = e.target.value;
-        if (input !== '')
-          this.table.addClass('search');
-        else {
-          console.log('in else block');
-          this.table.removeClass('search');
-          $trs.removeClass('selected');
-          return;
-        }
+      $tbody.toggleClass('search', !!(title || id));
+      let titleSearch = title ? `[data-title*="${title}"]` : '';
+      let idSearch = id ? `[data-satnum*="${id}"]` : '';
+      $prev = $tbody.find(`tr` + titleSearch + idSearch)
+                    .addClass('selected');
+    }, 150);
 
-        input = preHandle(input);
-
-        let re = new RegExp(input, 'i');
-
-        $searchSet.filter((_, elem) => re.test($(elem).text()))
-                  .closest('tr')
-                  .addClass('selected');
-      };
-
-      return throttle(handler, 300);
-    };
-
-    $tFilter.keyup(filterHandler($titles, input => {
-      input = input.split('').map(c => escapeRegExp(c)).join('.*');
-      input = '.*' + input + '.*';
-      return input;
-    }));
-
-    $idFilter.keyup(filterHandler($ids, input => '.*' + input + '.*'));
+    $tFilter.on('input', handler);
+    $idFilter.on('input', handler);
   }
 
   makeTable(satellites) {

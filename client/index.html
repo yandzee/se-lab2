@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-      <title>Bite my shiny metal ass</title>
+      <title>SE Project</title>
       <meta charset="utf-8">
       <link rel="stylesheet" href="styles/core.css">
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
@@ -19,8 +19,9 @@
       <script src="index.js" defer></script>
 
       <script type="text/html" id="list-elem-template">
-        <tr data-satnum="<%satnum%>">
-          <td class="title-column"><%title%></td><td><%satnum%></td>
+        <tr data-title="<%title.toLowerCase()%>" data-satnum="<%satnum%>">
+          <td class="title-column"><%title%></td>
+          <td><%satnum%></td>
         </tr>
       </script>
 
@@ -54,10 +55,10 @@
             <thead>
               <tr>
                 <td class="title-column">
-                  <input class="form-control input-xs" placeholder="Title (re)" id="title-filter">
+                  <input class="form-control input-xs" placeholder="Title" id="title-filter">
                 </td>
                 <td>
-                  <input class="form-control input-xs" placeholder="ID (re)" id="id-filter">
+                  <input type="number" class="form-control input-xs" placeholder="ID" id="id-filter">
                 </td>
               </tr>
               <tr>
