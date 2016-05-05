@@ -9,8 +9,8 @@
       <script src="http://code.jquery.com/jquery-2.2.3.min.js"></script>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
       <script src="https://maps.googleapis.com/maps/api/js"></script>
-      <script src="jquery-setdate.js"></script>
       <script src="satellite.min.js"></script>
+      <script src="model.js"></script>
       <script src="utils.js"></script>
       <script src="fetcher.js"></script>
       <script src="list.js"></script>
@@ -83,18 +83,22 @@
         <h3>Map</h3>
         <table class="table table-condensed map-table">
           <tr>
-            <td style="width: 60px;"><label>Since</label></td>
+            <td style="width: 120px;"><label>Since</label></td>
             <td style="width: 150px;"><input class="form-control" type="datetime-local" id="since-date"></td>
-            <td style="width: 60px;"><label>Until </label></td>
+            <td style="width: 120px;"><label>Until </label></td>
             <td style="width: 150px; "><input class="form-control" type="datetime-local" id="until-date"></td>
-            <td><button class="btn btn-primary" id="show-period-btn">Show</button></td>
           </tr>
           <tr>
             <td><label>Date</label></td>
             <td><input class="form-control" type="datetime-local" id="certain-date"></td>
-            <td><label>Revolutions:</label></td>
+            <td><label>Revolutions</label></td>
             <td><input class="form-control" type="number" value=1 id="revol-amount"></td>
-            <td><button class="btn btn-primary" id="show-certain-btn">Show</button></td>
+          </tr>
+          <tr>
+            <td><label>Start azimuth</label></td>
+            <td><span id="start-az"></span></td>
+            <td><label>End azimuth</label></td>
+            <td><span id="end-az"></span></td>
           </tr>
         </table>
         <div id="google-map" style='width: 800px; height: 600px;'>
