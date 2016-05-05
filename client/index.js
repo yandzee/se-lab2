@@ -19,6 +19,5 @@ $('#config-btn').click(e => {
 });
 
 $('#config-save-btn').click(e => {
-  console.log('Saving...');
   $('#config-modal').modal('hide');
 });

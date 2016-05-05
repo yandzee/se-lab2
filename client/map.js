@@ -26,8 +26,13 @@ class MapComponent extends EventEmitter {
 
     this.updateTraces = this.periodTraces;
 
+    this.satOrbs = {};
+
     this.initMap();
     this.makeHandlers();
+
+    setInterval(() => this.updateMarkers(), 2000);
+    this.showMyPosition();
   }
 
   initMap() {
@@ -66,6 +71,26 @@ class MapComponent extends EventEmitter {
     });
   }
 
+  showMyPosition() {
+    if (!navigator.geolocation)
+      return;
+    navigator.geolocation.getCurrentPosition(coords => {
+      this.coords = coords = coords.coords;
+      console.log(coords);
+      let mrk = new google.maps.Marker({
+        position: new google.maps.LatLng(coords.latitude, coords.longitude),
+        map: this.map,
+        icon: {
+          url: '/mypos.png',
+          size: new google.maps.Size(200, 200),
+          scaledSize: new google.maps.Size(26, 26),
+          anchor: { x: 13, y: 13 },
+        },
+      });
+      mrk.setMap(this.map);
+    });
+  }
+
   makeHandlers() {
     let $showPeriodBtn = this.showPeriodBtn;
     let $showCertainBtn = this.showCertainBtn;
@@ -75,25 +100,22 @@ class MapComponent extends EventEmitter {
     let $certainInput = this.certainInput;
 
     let certainHandler = e => {
-      console.log('in certainInput input handler');
       let date = new Date($certainInput.val());
-      console.log(date);
       this.certainDate = date;
       this.updateTraces = this.dateRevsTraces;
       this.updateTraces();
     };
 
     let revolHandler = e => {
-      console.log('in revolInput input handler');
       let nrevs = parseInt($revolInput.val(), 10);
-      nrevs = nrevs == null ? 1 : nrevs;
+      nrevs = !nrevs || nrevs < 1 ? 1 : nrevs;
+      $revolInput.val(nrevs);
       this.nrevs = nrevs;
       this.updateTraces = this.dateRevsTraces;
       this.updateTraces();
     };
 
     let sinceHandler = e => {
-      console.log('in sinceInput input handler');
       let since = new Date($sinceInput.val());
       this.since = since;
       this.updateTraces = this.periodTraces;
@@ -101,7 +123,6 @@ class MapComponent extends EventEmitter {
     };
 
     let untilHandler = e => {
-      console.log('in untilInput input handler');
       let until = new Date($untilInput.val());
       this.until = until;
       this.updateTraces = this.periodTraces;
@@ -121,28 +142,33 @@ class MapComponent extends EventEmitter {
     $revolInput.on('focusin', revolHandler);
   }
 
-  propagateAll(sat, orbs, traces, ts0, ts1) {
-    let step = (ts1 - ts0) / 50;
-    traces[sat] = [];
+  propagateAll(sat, orbs, ts0, ts1) {
+    const steps = 30;
+    let no = orbs[orbs.length / 2 | 0].no;
+    let revTime = 24 * 3600 * 1000 / no;
+    let step = revTime / steps;
+    let points = [];
+
     for (let ts = ts0; ts <= ts1; ts += step) {
       let closest = this.closest(orbs, ts);
       let point = closest.predict(ts);
-      traces[sat].push(point);
+      points.push(point);
     }
+
+    return points;
   }
 
   periodTraces() {
-    this.clearMap();
-
     let ts0 = this.since.getTime();
     let ts1 = this.until.getTime();
     if (ts1 < ts0) return;
     let traces = {};
-
+    this.clearMap();
     let promises = [];
     for (let sat of this.activeSatallites) {
       let p = Satellite.get(sat).period(ts0, ts1).then(orbs => {
-        this.propagateAll(sat, orbs, traces, ts0, ts1);
+        let points = this.propagateAll(sat, orbs, ts0, ts1);
+        traces[sat] = points.map(gLatLngDeg);
         this.satelliteIcon(orbs, ts0, ts1);
       });
       promises.push(p);
@@ -152,23 +178,36 @@ class MapComponent extends EventEmitter {
   }
 
   dateRevsTraces() {
-    this.clearMap();
-
     let ts = this.certainDate.getTime();
     let nrevs = this.nrevs;
     let traces = {};
-    let now = new Date().getTime();
+    let now = Date.now();
 
+    this.clearMap();
+
+    // XXX: rewrite this crazy bullshit.
     Promise.all(this.activeSatallites.map(sat =>
       Satellite.get(sat).revols(ts, nrevs).then(orbs => {
         let orbsInDay = orbs[0].no;
-        let window = 24 * 3600 * 1000 * nrevs / orbsInDay / 1.99;
+        let window = 24 * 3600 * 1000 * nrevs / orbsInDay / 2;
         let ts0 = ts - window;
         let ts1 = ts + window;
-        this.propagateAll(sat, orbs, traces, ts0, ts1);
+        let points = this.propagateAll(sat, orbs, ts0, ts1);
+        traces[sat] = points.map(gLatLngDeg);
+        this.satOrbs[sat] = orbs;
         this.satelliteIcon(orbs, ts0, ts1);
       })
     )).then(_ => this.render(traces));
+  }
+
+  createLabel(title, satnum) {
+    let c = document.createElement('div');
+    c.innerHTML = '<strong>' + title + '</strong><br>(' + satnum + ')';
+    let info = new google.maps.InfoWindow({
+      content: c,
+    });
+
+    return info;
   }
 
   satelliteIcon(orbs, ts0, ts1) {
@@ -178,18 +217,38 @@ class MapComponent extends EventEmitter {
     let point = closest.predict(now);
     let pos = gLatLngDeg(point);
     let marker = this.satelliteMarker(pos);
+    marker.satnum = orbs[0].satnum;
+    let lbl = this.createLabel(Satellite.get(marker.satnum).name, marker.satnum);
+    google.maps.event.addListener(marker, 'click', () => {
+      lbl.open(this.map, marker);
+    });
     this.markers.push(marker);
-    marker.setMap(this.map);
+  }
+
+  updateMarkers() {
+    if (!this.satOrbs)
+      return;
+    for (let mrk of this.markers) {
+      if (!this.satOrbs[mrk.satnum])
+        continue;
+      let closest = this.closest(this.satOrbs[mrk.satnum], Date.now());
+      let point = closest.predict(Date.now());
+      let pos = gLatLngDeg(point);
+      mrk.setPosition(pos);
+    }
   }
 
   render(traces) {
     let i = 0;
     for (let satnum in traces) {
-      let gpoints = traces[satnum].map(p => gLatLngDeg(p));
+      let gpoints = traces[satnum];
       let path = this.createPath(gpoints, i);
       this.showPath(path);
       ++i;
     }
+
+    for (let mrk of this.markers)
+      mrk.setMap(this.map);
   }
 
   showPath(path) {

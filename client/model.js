@@ -35,13 +35,6 @@ class Satellite {
     );
   }
 
-  azimuth() {
-    return fetcher.fetchAzimuth().then(azData => {
-      azData.startAzCompass = azCompass(azData.startAz);
-      azData.endAzCompass = azCompass(azData.endAz);
-      return azData;
-    });
-  }
   static load() {
     if (Satellite.satellites == null)
       Satellite.satellites = {};
@@ -67,6 +60,7 @@ class OrbElement {
     this.no = orb.no;
     this.prepared = false;
     this.raw = orb;
+    this.satnum = orb.satnum;
   }
 
   timeDist(ts) {
