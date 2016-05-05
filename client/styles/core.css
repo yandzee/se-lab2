@@ -9,7 +9,7 @@ html, body {
   width: 400px;
   /*border: 1px solid red;*/
   height: 100%;
-  overflow: scroll;
+  overflow: hidden;
 }
 
 .top-first-column {
@@ -20,18 +20,16 @@ html, body {
 }
 
 .bottom-first-column {
-  /*border: 1px solid purple;*/
+/*  border: 1px solid purple;*/
   border-top: 1px solid lightgray;
-  overflow: hidden;
   height: 40%;
-  overflow: hidden;
+  overflow: scroll;
 }
 
 .second-column {
   position: fixed;
   margin-left: 415px;
   height: 100%;
-  /*border: 1px solid gray;*/
   width: 100%;
 }
 
@@ -43,4 +41,27 @@ html, body {
 
 .title-column {
   width: 300px;
+}
+
+.map-table {
+  display: inline;
+  width: 600px;
+}
+
+.search tr {
+  display: none;
+}
+
+.search tr.selected {
+  display: table-row;
+}
+
+#google-map {
+  margin-top: 20px;
+}
+
+#info-component {
+  padding: 15px;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }

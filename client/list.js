@@ -5,45 +5,81 @@ class ListComponent extends EventEmitter {
     super();
     this.elems = [];
     this.selected = [];
-    this.trs = $listDiv.find('#satellites');
-    this.fetchData();
+    this.table = $listDiv.find('#satellites');
+    this.titleFilter = $listDiv.find('#title-filter');
+    this.idFilter = $listDiv.find('#id-filter');
+
+    Satellite.load().then(satellites => {
+      this.makeTable(satellites);
+      this.setTableHandlers();
+      this.makeFilters();
+    });
+  }
+
+  makeFilters() {
+    let $tFilter = this.titleFilter;
+    let $idFilter = this.idFilter;
+    let $trs = this.table.find('tr');
+    let $table = this.table.closest('table');
+    let $titles = $trs.find('td:nth(0)');
+    let $ids = $trs.find('td:nth(1)');
+
+    let filterHandler = ($searchSet, preHandle) => {
+
+      let handler = e => {
+        let input = e.target.value;
+        if (input !== '')
+          this.table.addClass('search');
+        else {
+          console.log('in else block');
+          this.table.removeClass('search');
+          $trs.removeClass('selected');
+          return;
+        }
+
+        input = preHandle(input);
+
+        let re = new RegExp(input, 'i');
+
+        $searchSet.filter((_, elem) => re.test($(elem).text()))
+                  .closest('tr')
+                  .addClass('selected');
+      };
+
+      return throttle(handler, 300);
+    };
+
+    $tFilter.keyup(filterHandler($titles, input => {
+      input = input.split('').map(c => escapeRegExp(c)).join('.*');
+      input = '.*' + input + '.*';
+      return input;
+    }));
+
+    $idFilter.keyup(filterHandler($ids, input => '.*' + input + '.*'));
   }
 
   makeTable(satellites) {
     for (let sat of satellites) {
       let html = tmpl('list-elem-template');
-      this.trs.append($(html(sat)));
+      this.table.append($(html(sat)));
     }
-
-    this.setTableHandlers();
-  }
-
-  fetchData() {
-    let f = new Fetcher();
-    f.fetchSatellites().then(satellites => {
-      this.makeTable(satellites);
-    });
   }
 
   setTableHandlers() {
-    this.trs.delegate('tr', 'click', (e) => {
+    this.table.delegate('tr', 'click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       let $tr = $(e.currentTarget);
       if (e.ctrlKey || e.altKey)
-        $tr.toggleClass('active');
+        $tr.toggleClass('info');
       let satnum = $tr.data('satnum');
-      if ($tr.hasClass('active'))
+      if ($tr.hasClass('info'))
         this.emit('selected', satnum);
       else
         this.emit('unselected', satnum);
 
       return false;
     });
-  }
-
-  addElem(elem) {
-    this.elems.push(elem);
   }
 
   addSelected(elem) {
