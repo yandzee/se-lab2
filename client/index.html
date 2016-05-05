@@ -38,6 +38,8 @@
           <tr><td><b>Source</b></td><td><%source%></td></tr>
           <tr><td><b>Launch site</b></td><td><%site%></td></tr>
           <tr><td><b>Note</b></td><td><%note%></td></tr>
+          <tr><td><b>Start Azimuth</b></td><td><%startAz%></td></tr>
+          <tr><td><b>End Azimuth</b></td><td><%endAz%></td></tr>
         </table>
       </script>
   </head>
@@ -64,7 +66,7 @@
             </thead>
           </table>
           <div style="height: 300px; overflow: scroll;">
-            <table class="table table-bordered table-condensed">
+            <table class="table table-bordered table-condensed" id='search-table'>
               <tbody id="satellites" class="scroll">
                 
               </tbody>
@@ -93,12 +95,6 @@
             <td><input class="form-control" type="datetime-local" id="certain-date"></td>
             <td><label>Revolutions</label></td>
             <td><input class="form-control" type="number" value=1 id="revol-amount"></td>
-          </tr>
-          <tr>
-            <td><label>Start azimuth</label></td>
-            <td><span id="start-az"></span></td>
-            <td><label>End azimuth</label></td>
-            <td><span id="end-az"></span></td>
           </tr>
         </table>
         <div id="google-map" style='width: 800px; height: 600px;'>

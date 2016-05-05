@@ -20,21 +20,30 @@ class ListComponent extends EventEmitter {
     let $tFilter = this.titleFilter;
     let $idFilter = this.idFilter;
     let $trs = this.table.find('tr');
+    let $table = this.table.closest('table');
     let $titles = $trs.find('td:nth(0)');
     let $ids = $trs.find('td:nth(1)');
 
     let filterHandler = ($searchSet, preHandle) => {
 
       let handler = e => {
-        $trs.removeClass('hide');
         let input = e.target.value;
+        if (input !== '')
+          this.table.addClass('search');
+        else {
+          console.log('in else block');
+          this.table.removeClass('search');
+          $trs.removeClass('selected');
+          return;
+        }
+
         input = preHandle(input);
-        
+
         let re = new RegExp(input, 'i');
 
-        $searchSet.filter((_, elem) => !re.test($(elem).text()))
+        $searchSet.filter((_, elem) => re.test($(elem).text()))
                   .closest('tr')
-                  .addClass('hide');
+                  .addClass('selected');
       };
 
       return throttle(handler, 300);
