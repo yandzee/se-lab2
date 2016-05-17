@@ -3,7 +3,7 @@
   <head>
       <title>Satellite Tracker</title>
       <meta charset="utf-8">
-      <link rel="stylesheet" href="styles/core.css">
+      <link rel="stylesheet" href="styles.css">
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
       <script src="http://code.jquery.com/jquery-2.2.3.min.js"></script>
@@ -43,80 +43,18 @@
       </script>
   </head>
   <body>  
-    <div class="first-column">   
-      <div class="top-first-column">
-        <div id="list-component">
-          <h3 class="component-header">Satellites</h3>
-          <table class="table table-bordered table-condensed" style="margin-bottom: 0;">
-            <thead>
-              <tr>
-                <td class="title-column">
-                  <input class="form-control input-xs" placeholder="Title" id="title-filter">
-                </td>
-                <td>
-                  <input type="number" class="form-control input-xs" placeholder="ID" id="id-filter">
-                </td>
-              </tr>
-              <tr>
-                <th>Title</th><th>ID</th>
-              </tr>
-            </thead>
-          </table>
-          <div class="table-content">
-            <table class="table table-bordered table-condensed" id='search-table'>
-              <tbody id="satellites" class="scroll"></tbody>
-            </table>
-          </div>
+    <div class="main-layout">
+      <div class="wrapper">
+        <div class="first-column">
+            <div class="top">
+              Top
+            </div>
+            <div class="bottom">
+              Bottom
+            </div>
         </div>
-      </div>
-      <div class="bottom-first-column">
-        <div id="info-component">
-          <h3 class="component-header">Satellite info</h3>
-        </div>
-      </div>
-    </div>
-    <div class="second-column">
-      <div id="map-component">
-        <h3 class="component-header">Map</h3>
-        <table class="table table-condensed map-table">
-          <tr>
-            <td class="td-label"><label>Since</label></td>
-            <td class="td-input"><input class="form-control" type="datetime-local" id="since-date"></td>
-            <td class="td-label"><label>Until </label></td>
-            <td class="td-input"><input class="form-control" type="datetime-local" id="until-date"></td>
-          </tr>
-          <tr>
-            <td><label>Date</label></td>
-            <td><input class="form-control" type="datetime-local" id="certain-date"></td>
-            <td><label>Revolutions</label></td>
-            <td><input class="form-control" type="number" value=1 id="revol-amount"></td>
-          </tr>
-        </table>
-        <div id="google-map">
-        </div>
-      </div>
-    </div>
-    <div class="config-button">
-      <button class="btn btn-primary" id="config-btn" data-toggle="modal" data-target="#config-modal">
-        <span class="glyphicon glyphicon-wrench"></span>
-      </button>
-    </div>
-    <div class="modal fade" id="config-modal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal">
-              <span>&times;</span>
-            </button>
-            <h4 class="modal-title" id="myModalLabel">Configuration</h4>
-          </div>
-          <div class="modal-body">
-            ...
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" id='config-save-btn'>Save changes</button>
-          </div>
+        <div class="second-column">
+          Second column
         </div>
       </div>
     </div>

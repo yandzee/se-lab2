@@ -1,0 +1,40 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.main-layout {
+  display: flex;
+  flex-flow: row nowrap;
+  height: 100%;
+  border: 1px solid gray;
+}
+
+.wrapper {
+  flex: 1 0 100%;
+  display: flex;
+}
+
+.first-column {
+  display: flex;
+  flex: 0 0 400px;
+  flex-direction: column;
+  border: 1px solid red;
+}
+
+.second-column {
+  flex: 1 0 auto;
+  border: 1px solid green;
+  padding: 15px;
+}
+
+.first-column .top {
+  flex: 1 0 100%;
+  border: 1px solid blue;
+}
+
+.first-column .bottom {
+  flex: 1 0 100%;
+  border: 1px solid purple;
+}
