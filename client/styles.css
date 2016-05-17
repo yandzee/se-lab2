@@ -8,7 +8,7 @@ html, body {
   display: flex;
   flex-flow: row nowrap;
   height: 100%;
-  border: 1px solid gray;
+  overflow: hidden;
 }
 
 .wrapper {
@@ -20,21 +20,61 @@ html, body {
   display: flex;
   flex: 0 0 400px;
   flex-direction: column;
-  border: 1px solid red;
+  box-shadow: 0 0 4px 0 #808080;
 }
 
 .second-column {
   flex: 1 0 auto;
-  border: 1px solid green;
-  padding: 15px;
+  padding: 0 15px 15px 15px;
 }
 
 .first-column .top {
-  flex: 1 0 100%;
-  border: 1px solid blue;
+  flex: 1 0 1px;
+  overflow: hidden;
 }
 
 .first-column .bottom {
-  flex: 1 0 100%;
-  border: 1px solid purple;
+  flex: 1 0 1px;
+  overflow: hidden;
+}
+
+#list-component {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#map-component {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#info-component {
+  box-shadow: -1px 0px 4px 0 #808080;
+}
+
+.table-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.title-column {
+  width: 300px;
+}
+
+.td-label {
+  width: 120px;
+}
+
+.td-input {
+  width: 150px;
+}
+
+#google-map {
+  /*margin-top: 20px;*/
+  /*height: 600px;
+  width: 100%;*/
+  flex: 1 1 auto;
 }
