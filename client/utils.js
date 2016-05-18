@@ -72,105 +72,39 @@ function escapeRegExp(str) {
   return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
 }
 
-function azCompass(deg) {
-  if (deg == null) return null;
-  let a = 0;
-  if ((deg >= a) && (deg < a + 15))
-    return 'N';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'NNE';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'NE';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'NE';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'ENE';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'E';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'E';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'ESE';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'SE';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'SE';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'SSE';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'S';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'S';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'SSW';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'SW';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'SW';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'WSW';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'W';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'W';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'WNW';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'NW';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'NW';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'NNW';
-  a = a + 15;
-  if ((deg >= a) && (deg < a + 15))
-    return 'N';
-  a = a + 15;
+function hsv2Rgb(h, s, v) {
+  let hi = (h * 6) | 0;
+  let f = h * 6 - hi;
+  let p = v * (1 - s);
+  let q = v * (1 - f * s);
+  let t = v * (1 - (1 - f) * s);
+  let r;
+  let g;
+  let b;
+  if (hi === 0)
+    [r, g, b] = [v, t, p];
+  if (hi === 1)
+    [r, g, b] = [q, v, p];
+  if (hi === 2)
+    [r, g, b] = [p, v, t];
+  if (hi === 3)
+    [r, g, b] = [p, q, v];
+  if (hi === 4)
+    [r, g, b] = [t, p, v];
+  if (hi === 5)
+    [r, g, b] = [v, p, q];
+  return { r: (r * 256) | 0, g: (g * 256) | 0, b: (b * 256) | 0 };
 }
 
-function getLocalTime(t) {
-  if (t == null) return null;
-  let dtmp = new Date();
-  let tz = 60 * 1000 * dtmp.getTimezoneOffset();
-  let d = new Date(t * 1000 - tz);
-  let h = d.getUTCHours();
-  let m = d.getUTCMinutes();
-  let d = d.getUTCDate();
-  if (h < 10) h = '0' + h;
-  if (m < 10) m = '0' + m;
-  let hm = h + ':' + m;
-  return hm;
+function rgbToHex(r, g, b) {
+  return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
 
-function getLocalDate(t) {
-  if (t == null) return null;
-  let dtmp = new Date();
-  let tz = 60 * 1000 * dtmp.getTimezoneOffset();
-  let d = new Date(t * 1000 - tz);
-  let dt = d.getUTCDate();
-  let m = d.getUTCMonth();
-  let mo = months[m];
-  let md = mo + ' ' + dt;
-  return md;
+function randomColor() {
+  let goldenRatio = 0.61803398875;
+  let hue = Math.random() + goldenRatio;
+  hue -= hue | 0;
+  let { r, g, b } = hsv2Rgb(hue, 0.99, 0.99);
+  let hex = rgbToHex(r, g, b);
+  return hex;
 }
