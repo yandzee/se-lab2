@@ -25,14 +25,10 @@ class MapComponent extends EventEmitter {
     this.certainDate = new Date(this.certainInput.val());
 
     this.traces = {};
-
     this.traceMaker = this.periodTrace;
-
-    this.satOrbs = {};
 
     this.initMap();
     this.makeHandlers();
-
     this.showMyPosition();
   }
 
@@ -92,44 +88,41 @@ class MapComponent extends EventEmitter {
     let $untilInput = this.untilInput;
     let $certainInput = this.certainInput;
 
-    let certainHandler = e => {
-      let date = new Date($certainInput.val());
-      this.certainDate = date;
-      this.traceMaker = this.dateRevsTrace;
-      this.refreshTraces();
-    };
-
     let revolHandler = e => {
+      let date = new Date($certainInput.val());
       let nrevs = parseInt($revolInput.val(), 10);
-      nrevs = !nrevs || nrevs < 1 ? 1 : nrevs;
+      nrevs = nrevs < 1 ? 1 : nrevs;
+      if (isNaN(nrevs))
+        return;
       $revolInput.val(nrevs);
+      this.certainDate = date;
       this.nrevs = nrevs;
       this.traceMaker = this.dateRevsTrace;
       this.refreshTraces();
     };
 
-    let sinceHandler = e => {
+    let intervalHandler = e => {
+      let daysLimit = 10;
       let since = new Date($sinceInput.val());
-      this.since = since;
-      this.traceMaker = this.periodTrace;
-      this.refreshTraces();
-    };
-
-    let untilHandler = e => {
       let until = new Date($untilInput.val());
+      if (until < since || until - since > 1000 * 60 * 3600 * daysLimit)
+        return;
+      
+      this.since = since;
       this.until = until;
+
       this.traceMaker = this.periodTrace;
       this.refreshTraces();
     };
 
-    $sinceInput.on('input', sinceHandler);
-    $sinceInput.on('focusin', sinceHandler);
+    $sinceInput.on('input', intervalHandler);
+    $sinceInput.on('focusin', intervalHandler);
 
-    $untilInput.on('input', untilHandler);
-    $untilInput.on('focusin', untilHandler);
+    $untilInput.on('input', intervalHandler);
+    $untilInput.on('focusin', intervalHandler);
 
-    $certainInput.on('input', certainHandler);
-    $certainInput.on('focusin', certainHandler);
+    $certainInput.on('input', revolHandler);
+    $certainInput.on('focusin', revolHandler);
 
     $revolInput.on('input', revolHandler);
     $revolInput.on('focusin', revolHandler);
