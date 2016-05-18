@@ -13,9 +13,10 @@ class Satellite {
       return Promise.resolve($.extend({}, this.satInfo));
 
     let params = { satnum: this.satnum };
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       $.get(window.location.origin + '/info', params,
-        data => resolve(data));
+        data => resolve(data))
+        .fail(reject);
     }).then(info => {
       this.satInfo = $.extend({}, info);
       return info;
@@ -25,17 +26,19 @@ class Satellite {
   period(ts0, ts1) {
     let params = { satnum: this.satnum, ts0, ts1 };
 
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       $.get(window.location.origin + '/period', params,
-        data => resolve(data));
+        data => resolve(data))
+        .fail(reject);
     }).then(orbs => OrbElement.fromOrbs(orbs));
   }
 
   revols(ts, nrevs) {
     let params = { satnum: this.satnum, ts, nrevs };
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       $.get(window.location.origin + '/revol', params,
-        data => resolve(data));
+        data => resolve(data))
+        .fail(reject);
     }).then(orbs => OrbElement.fromOrbs(orbs));
   }
 
@@ -43,9 +46,10 @@ class Satellite {
     if (Satellite.satellites == null)
       Satellite.satellites = {};
 
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       $.get(window.location.origin + '/satellites',
-        data => resolve(data));
+        data => resolve(data))
+        .fail(reject);
     }).then(satellites => {
       for (let sat of satellites) {
         let s = new Satellite(sat.satnum, sat.title);

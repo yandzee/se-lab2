@@ -107,7 +107,7 @@ class MapComponent extends EventEmitter {
       let until = new Date($untilInput.val());
       if (until < since || until - since > 1000 * 60 * 3600 * daysLimit)
         return;
-      
+
       this.since = since;
       this.until = until;
 
@@ -164,7 +164,11 @@ class MapComponent extends EventEmitter {
     for (let satnum in this.traces) {
       let oldColor = this.traces[satnum].color;
       this.removeTrace(satnum);
-      this.addTrace(satnum, oldColor);
+      this.addTrace(satnum, oldColor)
+        .catch(_ => {
+          this.emit('error');
+          throw new Error();
+        });
     }
   }
 
@@ -192,7 +196,12 @@ class MapComponent extends EventEmitter {
   }
 
   addTrace(satnum, color) {
-    this.createTrace(satnum, color).then(_ => this.showPath(satnum));
+    this.createTrace(satnum, color)
+        .then(_ => this.showPath(satnum))
+        .catch(_ => {
+          this.emit('error');
+          throw new Error();
+        });
   }
 
   removeTrace(satnum) {
