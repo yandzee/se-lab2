@@ -10,14 +10,14 @@ class Satellite {
 
   info() {
     if (this.satInfo)
-      return Promise.resolve(this.satInfo);
+      return Promise.resolve($.extend({}, this.satInfo));
 
     let params = { satnum: this.satnum };
     return new Promise(resolve => {
       $.get(window.location.origin + '/info', params,
         data => resolve(data));
     }).then(info => {
-      this.satInfo = info;
+      this.satInfo = $.extend({}, info);
       return info;
     });
   }

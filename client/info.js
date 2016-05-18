@@ -43,16 +43,14 @@ class InfoComponent extends EventEmitter {
         weekday: 'long',
         hour: 'numeric',
         minute: 'numeric',
-      })
+      });
 
     sat.info().then(info => {
       info.satnum = satnum;
-      console.log(info);
       for (let prop of props)
         fixProp(info, prop);
       for (let prop of dateProps)
         fixProp(info, prop, formatDate);
-      console.log(info);
       let html = tmpl('sat-info-template');
       this.infoDiv.html($(html(info)));
     });
