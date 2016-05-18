@@ -9,37 +9,44 @@ class Satellite {
   }
 
   info() {
-    if (this.satInfo) return new Promise((resolve, reject) => {
-      resolve(this.satInfo);
-    });
+    if (this.satInfo)
+      return Promise.resolve(this.satInfo);
 
-    return fetcher.fetchInfo(this.satnum).then(info => {
-      this.assignInfo(info);
+    let params = { satnum: this.satnum };
+    return new Promise(resolve => {
+      $.get(window.location.origin + '/info', params,
+        data => resolve(data));
+    }).then(info => {
+      this.satInfo = info;
       return info;
     });
   }
 
-  assignInfo(info) {
-    this.satInfo = info;
-  }
-
   period(ts0, ts1) {
-    return fetcher.fetchPeriod(this.satnum, ts0, ts1).then(orbs =>
-      OrbElement.fromOrbs(orbs)
-    );
+    let params = { satnum: this.satnum, ts0, ts1 };
+
+    return new Promise(resolve => {
+      $.get(window.location.origin + '/period', params,
+        data => resolve(data));
+    }).then(orbs => OrbElement.fromOrbs(orbs));
   }
 
   revols(ts, nrevs) {
-    return fetcher.fetchRevolutions(this.satnum, ts, nrevs).then(orbs =>
-      OrbElement.fromOrbs(orbs)
-    );
+    let params = { satnum: this.satnum, ts, nrevs };
+    return new Promise(resolve => {
+      $.get(window.location.origin + '/revol', params,
+        data => resolve(data));
+    }).then(orbs => OrbElement.fromOrbs(orbs));
   }
 
   static load() {
     if (Satellite.satellites == null)
       Satellite.satellites = {};
 
-    return fetcher.fetchSatellites().then(satellites => {
+    return new Promise(resolve => {
+      $.get(window.location.origin + '/satellites',
+        data => resolve(data));
+    }).then(satellites => {
       for (let sat of satellites) {
         let s = new Satellite(sat.satnum, sat.title);
         Satellite.satellites[sat.satnum] = s;
