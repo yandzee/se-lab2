@@ -63,11 +63,6 @@ function randInt(min, max) {
   return Math.round(min - 0.5 + Math.random() * (max - min + 1));
 }
 
-function gLatLngDeg(p) {
-  let c = 180 / Math.PI;
-  return new google.maps.LatLng(c * p.latitude, c * p.longitude);
-}
-
 function escapeRegExp(str) {
   return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
 }
