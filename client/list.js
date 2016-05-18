@@ -24,7 +24,7 @@ class ListComponent extends EventEmitter {
 
     let handler = throttle(_ => {
       if ($prev) $prev.removeClass('selected');
-      let title = $tFilter.val().trim();
+      let title = $tFilter.val().trim().toLowerCase();
       let id = $idFilter.val().trim();
 
       $tbody.toggleClass('search', !!(title || id));
@@ -49,9 +49,10 @@ class ListComponent extends EventEmitter {
     this.table.delegate('tr', 'click', (e) => {
       e.preventDefault();
       e.stopPropagation();
+      if (!e.ctrlKey && !e.altKey)
+        return;
       let $tr = $(e.currentTarget);
-      if (e.ctrlKey || e.altKey)
-        $tr.toggleClass('info');
+      $tr.toggleClass('info');
       let satnum = $tr.data('satnum');
       if ($tr.hasClass('info'))
         this.emit('selected', satnum);
