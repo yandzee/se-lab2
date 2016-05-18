@@ -191,7 +191,7 @@ class MapComponent extends EventEmitter {
       let updater = d.updater;
       let timer = setInterval(_ => {
         let res = updater();
-        if (res)
+        if (!res)
           clearInterval(timer);
       }, 2000);
       this.traces[satnum].timer = timer;
@@ -249,17 +249,18 @@ class MapComponent extends EventEmitter {
   createUpdater(marker, orbs, ts0, ts1) {
     return _ => {
       if (!marker)
-        return 1;
+        return false;
       let now = Date.now();
       if (now < ts0 || now > ts1) {
         marker.setMap(null);
-        return 1;
+        return false;
       }
 
       let closest = this.closest(orbs, Date.now());
       let point = closest.predict(Date.now());
       let pos = MapComponent.gLatLngDeg(point);
       marker.setPosition(pos);
+      return true;
     };
   }
 
