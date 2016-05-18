@@ -3,7 +3,7 @@
 class InfoComponent extends EventEmitter {
   constructor($infoDiv) {
     super();
-    this.infoDiv = $infoDiv;
+    this.infoDiv = $infoDiv.find('#info-content');
     this.info = [];
   }
 
@@ -23,27 +23,36 @@ class InfoComponent extends EventEmitter {
     if (l !== 0)
       this.displayInfo(this.info[l - 1]);
     else
-      this.infoDiv.html('Satellite info');
+      this.infoDiv.html('<h3>Satellite info</h3>');
   }
 
   displayInfo(satnum) {
-    let nullchk = (v, fv) => v == null ? '-' : (fv == null ? v : fv);
+    let fixProp = (obj, prop, handle) =>
+      obj[prop] == null ? (obj[prop] = '-')
+                        : (handle == null ? 0 : (obj[prop] = handle(obj[prop])));
     let sat = Satellite.get(satnum);
+    let props = ['intl', 'perigee', 'apogee', 'inclination', 'period',
+                 'semimajor', 'rcs', 'source', 'site', 'note'];
+
+    let dateProps = ['launch', 'decay'];
+    let formatDate = (date) =>
+      new Date(date).toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        weekday: 'long',
+        hour: 'numeric',
+        minute: 'numeric',
+      })
+
     sat.info().then(info => {
       info.satnum = satnum;
-      info.intl = nullchk(info.intl);
-      info.perigee = nullchk(info.perigee);
-      info.apogee = nullchk(info.apogee);
-      info.inclincation = nullchk(info.inclincation);
-      info.period = nullchk(info.period);
-      info.semimajor = nullchk(info.semimajor);
-      info.rcs = nullchk(info.rcs);
-      info.launch = nullchk(info.launch, new Date(info.launch));
-      info.decay = nullchk(info.decay, new Date(info.decay));
-      info.source = nullchk(info.source);
-      info.site = nullchk(info.site);
-      info.note = nullchk(info.note);
-
+      console.log(info);
+      for (let prop of props)
+        fixProp(info, prop);
+      for (let prop of dateProps)
+        fixProp(info, prop, formatDate);
+      console.log(info);
       let html = tmpl('sat-info-template');
       this.infoDiv.html($(html(info)));
     });
