@@ -8,6 +8,8 @@ class ListComponent extends EventEmitter {
     this.table = $listDiv.find('#satellites');
     this.titleFilter = $listDiv.find('#title-filter');
     this.idFilter = $listDiv.find('#id-filter');
+    this.titleSort = $listDiv.find('#title-sort');
+    this.idSort = $listDiv.find('#id-sort');
 
     Satellite.load().then(satellites => {
       this.makeTable(satellites);
@@ -60,6 +62,45 @@ class ListComponent extends EventEmitter {
         this.emit('unselected', satnum);
 
       return false;
+    });
+
+    let titleSortToggle = 1;
+    let idSortToggle = 1;
+
+    this.titleSort.click(e => {
+      let elems = this.table.find('tr');
+      elems.sort((a, b) => {
+        let aVal = $(a).data('title');
+        let bVal = $(b).data('title');
+
+        if (aVal > bVal) {
+          return -titleSortToggle;
+        } else {
+          return titleSortToggle;
+        }
+      });
+      titleSortToggle = -titleSortToggle;
+      this.titleSort.find('span').toggleClass('glyphicon-triangle-top');
+      elems.remove();
+      this.table.append(elems);
+    });
+
+    this.idSort.click(e => {
+      let elems = this.table.find('tr');
+      elems.sort((a, b) => {
+        let aVal = $(a).data('satnum');
+        let bVal = $(b).data('satnum');
+
+        if (aVal > bVal) {
+          return -idSortToggle;
+        } else {
+          return idSortToggle;
+        }
+      });
+      idSortToggle = -idSortToggle;
+      this.idSort.find('span').toggleClass('glyphicon-triangle-top');
+      elems.remove();
+      this.table.append(elems);
     });
   }
 
