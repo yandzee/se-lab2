@@ -32,6 +32,11 @@ class MapComponent extends EventEmitter {
     this.showMyPosition();
   }
 
+  static gLatLngDeg(p) {
+    let c = 180 / Math.PI;
+    return new google.maps.LatLng(c * p.latitude, c * p.longitude);
+  }
+
   initMap() {
     this.map = new google.maps.Map(document.getElementById('google-map'), {
       center: { lat: 0, lng: -180 },
@@ -54,7 +59,7 @@ class MapComponent extends EventEmitter {
     return new google.maps.Marker({
       map: this.map,
       icon: {
-        url: '/saticon.png',
+        url: '/assets/saticon.png',
         size: new google.maps.Size(30, 30),
         anchor: { x: 15, y: 15, },
       },
@@ -70,7 +75,7 @@ class MapComponent extends EventEmitter {
         position: new google.maps.LatLng(coords.latitude, coords.longitude),
         map: this.map,
         icon: {
-          url: '/mypos.png',
+          url: '/assets/mypos.png',
           size: new google.maps.Size(200, 200),
           scaledSize: new google.maps.Size(26, 26),
           anchor: { x: 13, y: 13 },
@@ -167,7 +172,6 @@ class MapComponent extends EventEmitter {
       this.addTrace(satnum, oldColor)
         .catch(_ => {
           this.emit('error');
-          throw new Error();
         });
     }
   }
@@ -200,7 +204,6 @@ class MapComponent extends EventEmitter {
         .then(_ => this.showPath(satnum))
         .catch(_ => {
           this.emit('error');
-          throw new Error();
         });
   }
 
@@ -210,14 +213,13 @@ class MapComponent extends EventEmitter {
   }
 
   periodTrace(satnum) {
-    let ts0 = this.since.getTime();
-    let ts1 = this.until.getTime();
+    let ts0 = +this.since;
+    let ts1 = +this.until;
     if (ts1 < ts0) return;
     let points;
-    let promises = [];
     return Satellite.get(satnum).period(ts0, ts1).then(orbs => {
       points = this.propagateAll(satnum, orbs, ts0, ts1);
-      points = points.map(gLatLngDeg);
+      points = points.map(MapComponent.gLatLngDeg);
       let marker = this.satelliteIcon(satnum);
       let updater = this.createUpdater(marker, orbs, ts0, ts1);
       return { points, marker, updater };
@@ -225,7 +227,7 @@ class MapComponent extends EventEmitter {
   }
 
   dateRevsTrace(satnum) {
-    let ts = this.certainDate.getTime();
+    let ts = +this.certainDate;
     let nrevs = this.nrevs;
     let points;
     let now = Date.now();
@@ -236,7 +238,7 @@ class MapComponent extends EventEmitter {
       let ts0 = ts - window;
       let ts1 = ts + window;
       points = this.propagateAll(satnum, orbs, ts0, ts1);
-      points = points.map(gLatLngDeg);
+      points = points.map(MapComponent.gLatLngDeg);
       let marker = this.satelliteIcon(satnum);
       let updater = this.createUpdater(marker, orbs, ts0, ts1);
 
@@ -256,7 +258,7 @@ class MapComponent extends EventEmitter {
 
       let closest = this.closest(orbs, Date.now());
       let point = closest.predict(Date.now());
-      let pos = gLatLngDeg(point);
+      let pos = MapComponent.gLatLngDeg(point);
       marker.setPosition(pos);
     };
   }
@@ -269,7 +271,7 @@ class MapComponent extends EventEmitter {
         continue;
       let closest = this.closest(this.satOrbs[mrk.satnum], Date.now());
       let point = closest.predict(Date.now());
-      let pos = gLatLngDeg(point);
+      let pos = MapComponent.gLatLngDeg(point);
       mrk.setPosition(pos);
     }
   }
