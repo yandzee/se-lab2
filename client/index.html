@@ -35,7 +35,8 @@
           <tr><td><b>Period</b></td><td><%period%> minutes</td></tr>
           <tr><td><b>Semi major axis</b></td><td><%semimajor%> km</td></tr>
           <tr><td><b>RCS</b></td><td><%rcs%> m<sup>2</sup></td></tr>
-          <tr><td><b>Launch date</b></td><td><%launch%></td></tr>
+          <tr><td><b>Launch</b></td><td><%launch%></td></tr>
+          <tr><td><b>Decay</b></td><td><%decay%></td></tr>
           <tr><td><b>Source</b></td><td><%source%></td></tr>
           <tr><td><b>Launch site</b></td><td><%site%></td></tr>
           <tr><td><b>Note</b></td><td><%note%></td></tr>
@@ -63,14 +64,16 @@
                     </tr>
                   </thead>
                 </table>             
-                <div class="table-content">
+                <div class="scrollable">
                   <table class="table table-condensed" id='search-table'>
-                    <tbody id="satellites" class="scroll"></tbody>
+                    <tbody id="satellites"></tbody>
                   </table>
                 </div>
             </div>
             <div class="bottom" id="info-component">
-              <h3>Satellite info</h3>
+              <div class="scrollable" id="info-content">
+                
+              </div>
             </div>
         </div>
         <div class="second-column" id="map-component">

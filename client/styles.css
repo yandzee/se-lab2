@@ -11,11 +11,6 @@ html, body {
   overflow: hidden;
 }
 
-.wrapper {
-  flex: 1 0 100%;
-  display: flex;
-}
-
 .first-column {
   display: flex;
   flex: 0 0 400px;
@@ -51,10 +46,13 @@ html, body {
 }
 
 #info-component {
+  display: flex;
+  flex-direction: column;
   box-shadow: -1px 0px 4px 0 #808080;
+  height: 100%;
 }
 
-.table-content {
+.scrollable {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
@@ -72,9 +70,14 @@ html, body {
   width: 150px;
 }
 
+.search tr {
+  display: none;
+}
+
+.search tr.selected {
+  display: table-row;
+}
+
 #google-map {
-  /*margin-top: 20px;*/
-  /*height: 600px;
-  width: 100%;*/
   flex: 1 1 auto;
 }
