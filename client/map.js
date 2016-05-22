@@ -200,7 +200,7 @@ class MapComponent extends EventEmitter {
   }
 
   addTrace(satnum, color) {
-    this.createTrace(satnum, color)
+    return this.createTrace(satnum, color)
         .then(_ => this.showPath(satnum))
         .catch(_ => {
           this.emit('error');
