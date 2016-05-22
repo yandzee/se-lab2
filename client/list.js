@@ -3,13 +3,13 @@
 class ListComponent extends EventEmitter {
   constructor($listDiv) {
     super();
-    this.elems = [];
-    this.selected = [];
+    this.selected = 0;
     this.table = $listDiv.find('#satellites');
     this.titleFilter = $listDiv.find('#title-filter');
     this.idFilter = $listDiv.find('#id-filter');
     this.titleSort = $listDiv.find('#title-sort');
     this.idSort = $listDiv.find('#id-sort');
+    this.nextSelected = $listDiv.find('#next-selected');
 
     Satellite.load().then(satellites => {
       this._makeTable(satellites);
@@ -21,7 +21,7 @@ class ListComponent extends EventEmitter {
   _makeFilters() {
     let $tFilter = this.titleFilter;
     let $idFilter = this.idFilter;
-    let $tbody = $('#satellites');
+    let $tbody = this.table;
     let $prev = $(null);
 
     let handler = throttle(_ => {
@@ -56,12 +56,45 @@ class ListComponent extends EventEmitter {
       let $tr = $(e.currentTarget);
       $tr.toggleClass('info');
       let satnum = $tr.data('satnum');
-      if ($tr.hasClass('info'))
+      if ($tr.hasClass('info')) {
         this._emit('selected', satnum);
-      else
+        this.selected += 1;
+      } else {
         this._emit('unselected', satnum);
+        this.selected -= 1;
+      }
+
+      if (this.selected)
+        this.nextSelected.removeClass('disabled');
+      else
+        this.nextSelected.addClass('disabled');
 
       return false;
+    });
+
+    this.nextSelected.click(e => {
+      let $tbody = this.table;
+      let $div = $tbody.closest('div');
+      let $selected = $tbody.find('tr.info');
+      if ($selected.length === 0)
+        return;
+
+      let tbOffset = $tbody.position().top;
+      let divScroll = $div.position().top - tbOffset;
+      let height = $div.height();
+
+      let visible = e => {
+        let offset = e.position().top - tbOffset;
+        return offset >= divScroll && offset - divScroll <= height;
+      };
+
+      let next = e => e.position().top - tbOffset - divScroll >= height;
+
+      let $invisible = $selected.filter((_, e) => !visible($(e)));
+      let $next = $invisible.filter((_, e) => next($(e)));
+      if ($next.length === 0)
+        $next = $selected.first();
+      $div.scrollTop($next.first().position().top - tbOffset);
     });
 
     let titleSortToggle = 1;
@@ -102,6 +135,7 @@ class ListComponent extends EventEmitter {
       elems.remove();
       this.table.append(elems);
     });
+
   }
 
   _addSelected(elem) {

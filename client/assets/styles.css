@@ -78,6 +78,14 @@ html, body {
   display: table-row;
 }
 
+.table-marginless {
+  margin-bottom: 0 !important;
+}
+
+.fixedsize {
+  flex: 0 0 auto;
+}
+
 #google-map {
   flex: 1 1 auto;
 }

@@ -46,34 +46,37 @@
     <div class="main-layout">
       <div class="first-column">
           <div class="top" id ="list-component">
-              <h3>Satellites</h3>
-              <table class="table table-condensed" style="margin-bottom: 0;">
-                <thead>
-                  <tr>
-                    <td class="title-column">
-                      <input class="form-control input-xs" placeholder="Title" id="title-filter">
-                    </td>
-                    <td>
-                      <input type="number" class="form-control input-xs" placeholder="ID" id="id-filter">
-                    </td>
-                  </tr>
-                  <tr>
-                    <th id='title-sort'>
-                      Title
-                      <span class="pull-right glyphicon glyphicon-triangle-bottom"></span>
-                    </th>
-                    <th id='id-sort'>
-                      ID
-                      <span class="pull-right glyphicon glyphicon-triangle-bottom"></span>
-                    </th>
-                  </tr>
-                </thead>
-              </table>             
-              <div class="scrollable">
-                <table class="table table-condensed" id='search-table'>
-                  <tbody id="satellites"></tbody>
-                </table>
-              </div>
+            <h3>Satellites</h3>
+            <table class="table table-condensed table-marginless">
+              <thead>
+                <tr>
+                  <td class="title-column">
+                    <input class="form-control input-xs" placeholder="Title" id="title-filter">
+                  </td>
+                  <td>
+                    <input type="number" class="form-control input-xs" placeholder="ID" id="id-filter">
+                  </td>
+                </tr>
+                <tr>
+                  <th id='title-sort'>
+                    Title
+                    <span class="pull-right glyphicon glyphicon-triangle-bottom"></span>
+                  </th>
+                  <th id='id-sort'>
+                    ID
+                    <span class="pull-right glyphicon glyphicon-triangle-bottom"></span>
+                  </th>
+                </tr>
+              </thead>
+            </table>             
+            <div class="scrollable">
+              <table class="table table-condensed table-marginless" id='search-table'>
+                <tbody id="satellites"></tbody>
+              </table>
+            </div>
+            <button class="btn btn-primary btn-block fixedsize disabled" id='next-selected'>
+              Show next selected
+            </button>
           </div>
           <div class="bottom" id="info-component">
             <div class="scrollable" id="info-content">
