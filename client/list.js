@@ -12,13 +12,13 @@ class ListComponent extends EventEmitter {
     this.idSort = $listDiv.find('#id-sort');
 
     Satellite.load().then(satellites => {
-      this.makeTable(satellites);
-      this.setTableHandlers();
-      this.makeFilters();
+      this._makeTable(satellites);
+      this._setTableHandlers();
+      this._makeFilters();
     });
   }
 
-  makeFilters() {
+  _makeFilters() {
     let $tFilter = this.titleFilter;
     let $idFilter = this.idFilter;
     let $tbody = $('#satellites');
@@ -40,14 +40,14 @@ class ListComponent extends EventEmitter {
     $idFilter.on('input', handler);
   }
 
-  makeTable(satellites) {
+  _makeTable(satellites) {
     for (let sat of satellites) {
       let html = tmpl('list-elem-template');
       this.table.append($(html(sat)));
     }
   }
 
-  setTableHandlers() {
+  _setTableHandlers() {
     this.table.delegate('tr', 'click', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -57,9 +57,9 @@ class ListComponent extends EventEmitter {
       $tr.toggleClass('info');
       let satnum = $tr.data('satnum');
       if ($tr.hasClass('info'))
-        this.emit('selected', satnum);
+        this._emit('selected', satnum);
       else
-        this.emit('unselected', satnum);
+        this._emit('unselected', satnum);
 
       return false;
     });
@@ -104,12 +104,12 @@ class ListComponent extends EventEmitter {
     });
   }
 
-  addSelected(elem) {
+  _addSelected(elem) {
     this.addSelected.push(elem);
-    this.emit('selected', elem);
+    this._emit('selected', elem);
   }
 
-  resetSelected(selectOne) {
+  _resetSelected(selectOne) {
     this.selected = [];
     if (selectOne)
       this.selected.push(selectOne);

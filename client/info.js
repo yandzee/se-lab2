@@ -12,7 +12,7 @@ class InfoComponent extends EventEmitter {
     if (s === -1)
       this.info.push(satnum);
 
-    this.displayInfo(satnum);
+    this._displayInfo(satnum);
   }
 
   showLast(satnum) {
@@ -21,12 +21,12 @@ class InfoComponent extends EventEmitter {
       this.info.splice(s, 1);
     let l = this.info.length;
     if (l !== 0)
-      this.displayInfo(this.info[l - 1]);
+      this._displayInfo(this.info[l - 1]);
     else
       this.infoDiv.html('<h3>Satellite info</h3>');
   }
 
-  displayInfo(satnum) {
+  _displayInfo(satnum) {
     let fixProp = (obj, prop, handle) =>
       obj[prop] == null ? (obj[prop] = '-')
                         : (handle == null ? 0 : (obj[prop] = handle(obj[prop])));

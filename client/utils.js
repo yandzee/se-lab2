@@ -12,7 +12,7 @@ class EventEmitter {
       this.events[event].push(handler);
   }
 
-  emit(event, ...data) {
+  _emit(event, ...data) {
     if (!(event in this.events))
       return;
 

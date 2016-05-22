@@ -8,6 +8,26 @@ class Satellite {
     this.satInfo = null;
   }
 
+  static load() {
+    if (Satellite.satellites == null)
+      Satellite.satellites = {};
+
+    return fetch(window.location.origin + '/satellites')
+      .then(data => data.json())
+      .then(satellites => {
+        for (let sat of satellites) {
+          let s = new Satellite(sat.satnum, sat.title);
+          Satellite.satellites[sat.satnum] = s;
+        }
+
+        return satellites;
+      });
+  }
+
+  static get(satnum) {
+    return Satellite.satellites[satnum];
+  }
+
   info() {
     if (this.satInfo)
       return Promise.resolve(Object.assign({}, this.satInfo));
@@ -35,26 +55,6 @@ class Satellite {
       .then(data => data.json())
       .then(orbs => OrbElement.fromOrbs(orbs));
   }
-
-  static load() {
-    if (Satellite.satellites == null)
-      Satellite.satellites = {};
-
-    return fetch(window.location.origin + '/satellites')
-      .then(data => data.json())
-      .then(satellites => {
-        for (let sat of satellites) {
-          let s = new Satellite(sat.satnum, sat.title);
-          Satellite.satellites[sat.satnum] = s;
-        }
-
-        return satellites;
-      });
-  }
-
-  static get(satnum) {
-    return Satellite.satellites[satnum];
-  }
 }
 
 class OrbElement {
@@ -64,6 +64,10 @@ class OrbElement {
     this.prepared = false;
     this.raw = orb;
     this.satnum = orb.satnum;
+  }
+
+  static fromOrbs(orbs) {
+    return orbs.map(orb => new OrbElement(orb));
   }
 
   timeDist(ts) {
@@ -93,9 +97,5 @@ class OrbElement {
     let gmst = satellite.gstimeFromDate(...dateProps);
     let posGeodetic = satellite.eciToGeodetic(posAndVel.position, gmst);
     return posGeodetic;
-  }
-
-  static fromOrbs(orbs) {
-    return orbs.map(orb => new OrbElement(orb));
   }
 }
