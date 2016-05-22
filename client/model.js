@@ -10,54 +10,46 @@ class Satellite {
 
   info() {
     if (this.satInfo)
-      return Promise.resolve($.extend({}, this.satInfo));
+      return Promise.resolve(Object.assign({}, this.satInfo));
 
-    let params = { satnum: this.satnum };
-    return new Promise((resolve, reject) => {
-      $.get(window.location.origin + '/info', params,
-        data => resolve(data))
-        .fail(reject);
-    }).then(info => {
-      this.satInfo = $.extend({}, info);
-      return info;
-    });
+    let params = serialize({ satnum: this.satnum });
+
+    return fetch(window.location.origin + '/info?' + params)
+      .then(data => data.json())
+      .then(info => {
+        this.satInfo = Object.assign({}, info);
+        return info;
+      });
   }
 
   period(ts0, ts1) {
-    let params = { satnum: this.satnum, ts0, ts1 };
-
-    return new Promise((resolve, reject) => {
-      $.get(window.location.origin + '/period', params,
-        data => resolve(data))
-        .fail(reject);
-    }).then(orbs => OrbElement.fromOrbs(orbs));
+    let params = serialize({ satnum: this.satnum, ts0, ts1 });
+    return fetch(window.location.origin + '/period?' + params)
+      .then(data => data.json())
+      .then(orbs => OrbElement.fromOrbs(orbs));
   }
 
   revols(ts, nrevs) {
-    let params = { satnum: this.satnum, ts, nrevs };
-    return new Promise((resolve, reject) => {
-      $.get(window.location.origin + '/revol', params,
-        data => resolve(data))
-        .fail(reject);
-    }).then(orbs => OrbElement.fromOrbs(orbs));
+    let params = serialize({ satnum: this.satnum, ts, nrevs });
+    return fetch(window.location.origin + '/revol?' + params)
+      .then(data => data.json())
+      .then(orbs => OrbElement.fromOrbs(orbs));
   }
 
   static load() {
     if (Satellite.satellites == null)
       Satellite.satellites = {};
 
-    return new Promise((resolve, reject) => {
-      $.get(window.location.origin + '/satellites',
-        data => resolve(data))
-        .fail(reject);
-    }).then(satellites => {
-      for (let sat of satellites) {
-        let s = new Satellite(sat.satnum, sat.title);
-        Satellite.satellites[sat.satnum] = s;
-      }
+    return fetch(window.location.origin + '/satellites')
+      .then(data => data.json())
+      .then(satellites => {
+        for (let sat of satellites) {
+          let s = new Satellite(sat.satnum, sat.title);
+          Satellite.satellites[sat.satnum] = s;
+        }
 
-      return satellites;
-    });
+        return satellites;
+      });
   }
 
   static get(satnum) {

@@ -169,10 +169,7 @@ class MapComponent extends EventEmitter {
     for (let satnum in this.traces) {
       let oldColor = this.traces[satnum].color;
       this.removeTrace(satnum);
-      this.addTrace(satnum, oldColor)
-        .catch(_ => {
-          this.emit('error');
-        });
+      this.addTrace(satnum, oldColor);
     }
   }
 
@@ -202,7 +199,8 @@ class MapComponent extends EventEmitter {
   addTrace(satnum, color) {
     return this.createTrace(satnum, color)
         .then(_ => this.showPath(satnum))
-        .catch(_ => {
+        .catch(e => {
+          console.log(e);
           this.emit('error');
         });
   }

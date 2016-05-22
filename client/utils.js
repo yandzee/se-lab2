@@ -63,10 +63,6 @@ function randInt(min, max) {
   return Math.round(min - 0.5 + Math.random() * (max - min + 1));
 }
 
-function escapeRegExp(str) {
-  return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
-}
-
 function hsv2Rgb(h, s, v) {
   let hi = (h * 6) | 0;
   let f = h * 6 - hi;
@@ -102,4 +98,10 @@ function randomColor() {
   let { r, g, b } = hsv2Rgb(hue, 0.99, 0.99);
   let hex = rgbToHex(r, g, b);
   return hex;
+}
+
+function serialize(obj) {
+  return Object.keys(obj).map(key =>
+    encodeURIComponent(key) + '=' + encodeURIComponent(obj[key])
+  ).join('&');
 }
