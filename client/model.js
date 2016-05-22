@@ -8,49 +8,52 @@ class Satellite {
     this.satInfo = null;
   }
 
-  info() {
-    if (this.satInfo) return new Promise((resolve, reject) => {
-      resolve(this.satInfo);
-    });
-
-    return fetcher.fetchInfo(this.satnum).then(info => {
-      this.assignInfo(info);
-      return info;
-    });
-  }
-
-  assignInfo(info) {
-    this.satInfo = info;
-  }
-
-  period(ts0, ts1) {
-    return fetcher.fetchPeriod(this.satnum, ts0, ts1).then(orbs =>
-      OrbElement.fromOrbs(orbs)
-    );
-  }
-
-  revols(ts, nrevs) {
-    return fetcher.fetchRevolutions(this.satnum, ts, nrevs).then(orbs =>
-      OrbElement.fromOrbs(orbs)
-    );
-  }
-
   static load() {
     if (Satellite.satellites == null)
       Satellite.satellites = {};
 
-    return fetcher.fetchSatellites().then(satellites => {
-      for (let sat of satellites) {
-        let s = new Satellite(sat.satnum, sat.title);
-        Satellite.satellites[sat.satnum] = s;
-      }
+    return fetch(window.location.origin + '/satellites')
+      .then(data => data.json())
+      .then(satellites => {
+        for (let sat of satellites) {
+          let s = new Satellite(sat.satnum, sat.title);
+          Satellite.satellites[sat.satnum] = s;
+        }
 
-      return satellites;
-    });
+        return satellites;
+      });
   }
 
   static get(satnum) {
     return Satellite.satellites[satnum];
+  }
+
+  info() {
+    if (this.satInfo)
+      return Promise.resolve(Object.assign({}, this.satInfo));
+
+    let params = serialize({ satnum: this.satnum });
+
+    return fetch(window.location.origin + '/info?' + params)
+      .then(data => data.json())
+      .then(info => {
+        this.satInfo = Object.assign({}, info);
+        return info;
+      });
+  }
+
+  period(ts0, ts1) {
+    let params = serialize({ satnum: this.satnum, ts0, ts1 });
+    return fetch(window.location.origin + '/period?' + params)
+      .then(data => data.json())
+      .then(orbs => OrbElement.fromOrbs(orbs));
+  }
+
+  revols(ts, nrevs) {
+    let params = serialize({ satnum: this.satnum, ts, nrevs });
+    return fetch(window.location.origin + '/revol?' + params)
+      .then(data => data.json())
+      .then(orbs => OrbElement.fromOrbs(orbs));
   }
 }
 
@@ -61,6 +64,10 @@ class OrbElement {
     this.prepared = false;
     this.raw = orb;
     this.satnum = orb.satnum;
+  }
+
+  static fromOrbs(orbs) {
+    return orbs.map(orb => new OrbElement(orb));
   }
 
   timeDist(ts) {
@@ -90,9 +97,5 @@ class OrbElement {
     let gmst = satellite.gstimeFromDate(...dateProps);
     let posGeodetic = satellite.eciToGeodetic(posAndVel.position, gmst);
     return posGeodetic;
-  }
-
-  static fromOrbs(orbs) {
-    return orbs.map(orb => new OrbElement(orb));
   }
 }

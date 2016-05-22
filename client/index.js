@@ -14,10 +14,6 @@ list.on('unselected', satnum => {
   info.showLast(satnum);
 });
 
-$('#config-btn').click(e => {
-
-});
-
-$('#config-save-btn').click(e => {
-  $('#config-modal').modal('hide');
+map.on('error', _ => {
+  $('#error-modal').modal();
 });

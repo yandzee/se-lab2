@@ -24,74 +24,86 @@ class MapComponent extends EventEmitter {
     this.until = new Date(this.untilInput.val());
     this.certainDate = new Date(this.certainInput.val());
 
-    this.updateTraces = this.periodTraces;
+    this.traces = {};
+    this._traceMaker = this._periodTrace;
 
-    this.satOrbs = {};
-
-    this.initMap();
-    this.makeHandlers();
-
-    setInterval(() => this.updateMarkers(), 2000);
-    this.showMyPosition();
+    this._initMap();
+    this._makeHandlers();
   }
 
-  initMap() {
-    this.map = new google.maps.Map(document.getElementById('google-map'), {
-      center: { lat: 0, lng: -180 },
-      zoom: 1,
-    });
-    this.paths = [];
-    this.markers = [];
+  static gLatLngDeg(p) {
+    let c = 180 / Math.PI;
+    return new google.maps.LatLng(c * p.latitude, c * p.longitude);
   }
 
-  createPath(points, i) {
-    let colors = ['#ff0000', '#00ff00', '#0000ff', '#008080', '#ffd700',
-                  '#800080', '#f6546a', '#40e0d0', '#3b5998', '#8b0000',
-                  ];
-
-    let path = new google.maps.Polyline({
-      path: points,
-      geodesic: true,
-      strokeColor: colors[i % colors.length],
-      strokeOpacity: 1.0,
-      strokeWeight: 2,
-    });
-    return path;
+  showSatellite(satnum) {
+    if (satnum in this.traces)
+      return;
+    this._addTrace(satnum);
   }
 
-  satelliteMarker(pos) {
-    return new google.maps.Marker({
-      position: pos,
-      map: this.map,
-      icon: {
-        url: '/saticon.png',
-        size: new google.maps.Size(30, 30),
-        anchor: { x: 15, y: 15, },
-      },
-    });
+  hideSatellite(satnum) {
+    if (!(satnum in this.traces))
+      return;
+    this._removeTrace(satnum);
   }
 
   showMyPosition() {
     if (!navigator.geolocation)
       return;
     navigator.geolocation.getCurrentPosition(coords => {
-      this.coords = coords = coords.coords;
-      console.log(coords);
+      coords = coords.coords;
       let mrk = new google.maps.Marker({
         position: new google.maps.LatLng(coords.latitude, coords.longitude),
         map: this.map,
         icon: {
-          url: '/mypos.png',
+          url: '/assets/mypos.png',
           size: new google.maps.Size(200, 200),
           scaledSize: new google.maps.Size(26, 26),
           anchor: { x: 13, y: 13 },
         },
       });
       mrk.setMap(this.map);
+      this.myPosMarker = mrk;
     });
   }
 
-  makeHandlers() {
+  hideMyPosition() {
+    if (!this.myPosMarker)
+      return;
+    this.myPosMarker.setMap(null);
+  }
+
+  _initMap() {
+    this.map = new google.maps.Map(document.getElementById('google-map'), {
+      center: { lat: 0, lng: -180 },
+      zoom: 1,
+    });
+  }
+
+  _createPath(points, color) {
+    let path = new google.maps.Polyline({
+      path: points,
+      geodesic: true,
+      strokeColor: color,
+      strokeOpacity: 1.0,
+      strokeWeight: 2,
+    });
+    return path;
+  }
+
+  _satelliteMarker() {
+    return new google.maps.Marker({
+      map: this.map,
+      icon: {
+        url: '/assets/saticon.png',
+        size: new google.maps.Size(30, 30),
+        anchor: { x: 15, y: 15, },
+      },
+    });
+  }
+
+  _makeHandlers() {
     let $showPeriodBtn = this.showPeriodBtn;
     let $showCertainBtn = this.showCertainBtn;
     let $sinceInput = this.sinceInput;
@@ -99,50 +111,47 @@ class MapComponent extends EventEmitter {
     let $untilInput = this.untilInput;
     let $certainInput = this.certainInput;
 
-    let certainHandler = e => {
-      let date = new Date($certainInput.val());
-      this.certainDate = date;
-      this.updateTraces = this.dateRevsTraces;
-      this.updateTraces();
-    };
-
     let revolHandler = e => {
+      let date = new Date($certainInput.val());
       let nrevs = parseInt($revolInput.val(), 10);
-      nrevs = !nrevs || nrevs < 1 ? 1 : nrevs;
+      nrevs = nrevs < 1 ? 1 : nrevs;
+      if (isNaN(nrevs))
+        return;
       $revolInput.val(nrevs);
+      this.certainDate = date;
       this.nrevs = nrevs;
-      this.updateTraces = this.dateRevsTraces;
-      this.updateTraces();
+      this._traceMaker = this._dateRevsTrace;
+      this._refreshTraces();
     };
 
-    let sinceHandler = e => {
+    let intervalHandler = e => {
+      let daysLimit = 10;
       let since = new Date($sinceInput.val());
-      this.since = since;
-      this.updateTraces = this.periodTraces;
-      this.updateTraces();
-    };
-
-    let untilHandler = e => {
       let until = new Date($untilInput.val());
+      if (until < since || until - since > 1000 * 60 * 3600 * daysLimit)
+        return;
+
+      this.since = since;
       this.until = until;
-      this.updateTraces = this.periodTraces;
-      this.updateTraces();
+
+      this._traceMaker = this._periodTrace;
+      this._refreshTraces();
     };
 
-    $sinceInput.on('input', sinceHandler);
-    $sinceInput.on('focusin', sinceHandler);
+    $sinceInput.on('input', intervalHandler);
+    $sinceInput.on('focusin', intervalHandler);
 
-    $untilInput.on('input', untilHandler);
-    $untilInput.on('focusin', untilHandler);
+    $untilInput.on('input', intervalHandler);
+    $untilInput.on('focusin', intervalHandler);
 
-    $certainInput.on('input', certainHandler);
-    $certainInput.on('focusin', certainHandler);
+    $certainInput.on('input', revolHandler);
+    $certainInput.on('focusin', revolHandler);
 
     $revolInput.on('input', revolHandler);
     $revolInput.on('focusin', revolHandler);
   }
 
-  propagateAll(sat, orbs, ts0, ts1) {
+  _propagateAll(sat, orbs, ts0, ts1) {
     const steps = 30;
     let no = orbs[orbs.length / 2 | 0].no;
     let revTime = 24 * 3600 * 1000 / no;
@@ -150,7 +159,7 @@ class MapComponent extends EventEmitter {
     let points = [];
 
     for (let ts = ts0; ts <= ts1; ts += step) {
-      let closest = this.closest(orbs, ts);
+      let closest = this._closest(orbs, ts);
       let point = closest.predict(ts);
       points.push(point);
     }
@@ -158,49 +167,103 @@ class MapComponent extends EventEmitter {
     return points;
   }
 
-  periodTraces() {
-    let ts0 = this.since.getTime();
-    let ts1 = this.until.getTime();
-    if (ts1 < ts0) return;
-    let traces = {};
-    this.clearMap();
-    let promises = [];
-    for (let sat of this.activeSatallites) {
-      let p = Satellite.get(sat).period(ts0, ts1).then(orbs => {
-        let points = this.propagateAll(sat, orbs, ts0, ts1);
-        traces[sat] = points.map(gLatLngDeg);
-        this.satelliteIcon(orbs, ts0, ts1);
-      });
-      promises.push(p);
+  _refreshTraces() {
+    for (let satnum in this.traces) {
+      let oldColor = this.traces[satnum].color;
+      this._removeTrace(satnum);
+      this._addTrace(satnum, oldColor);
     }
-
-    Promise.all(promises).then(_ => this.render(traces));
   }
 
-  dateRevsTraces() {
-    let ts = this.certainDate.getTime();
+  _computeTrace(satnum, color) {
+    color = color || randomColor();
+    return this._traceMaker(satnum).then(d => {
+      let { points, marker, updater } = d;
+      let path = this._createPath(points, color);
+      return { color, path, marker, updater };
+    });
+  }
+
+  _createTrace(satnum, color) {
+    return this._computeTrace(satnum, color).then(d => {
+      this.traces[satnum] = d;
+      let updater = d.updater;
+      let timer = setInterval(_ => {
+        let res = updater();
+        if (!res)
+          clearInterval(timer);
+      }, 2000);
+      this.traces[satnum].timer = timer;
+      return this.traces[satnum];
+    });
+  }
+
+  _addTrace(satnum, color) {
+    return this._createTrace(satnum, color)
+      .then(_ => this._showPath(satnum))
+      .catch(_ => {
+        this._emit('error');
+      });
+  }
+
+  _removeTrace(satnum) {
+    this._hidePath(satnum);
+    delete this.traces[satnum];
+  }
+
+  _periodTrace(satnum) {
+    let ts0 = +this.since;
+    let ts1 = +this.until;
+    if (ts1 < ts0) return;
+    let points;
+    return Satellite.get(satnum).period(ts0, ts1).then(orbs => {
+      points = this._propagateAll(satnum, orbs, ts0, ts1);
+      points = points.map(MapComponent.gLatLngDeg);
+      let marker = this._satelliteIcon(satnum);
+      let updater = this._createUpdater(marker, orbs, ts0, ts1);
+      return { points, marker, updater };
+    });
+  }
+
+  _dateRevsTrace(satnum) {
+    let ts = +this.certainDate;
     let nrevs = this.nrevs;
-    let traces = {};
+    let points;
     let now = Date.now();
 
-    this.clearMap();
+    return Satellite.get(satnum).revols(ts, nrevs).then(orbs => {
+      let orbsInDay = orbs[0].no;
+      let window = 24 * 3600 * 1000 * nrevs / orbsInDay / 2;
+      let ts0 = ts - window;
+      let ts1 = ts + window;
+      points = this._propagateAll(satnum, orbs, ts0, ts1);
+      points = points.map(MapComponent.gLatLngDeg);
+      let marker = this._satelliteIcon(satnum);
+      let updater = this._createUpdater(marker, orbs, ts0, ts1);
 
-    // XXX: rewrite this crazy bullshit.
-    Promise.all(this.activeSatallites.map(sat =>
-      Satellite.get(sat).revols(ts, nrevs).then(orbs => {
-        let orbsInDay = orbs[0].no;
-        let window = 24 * 3600 * 1000 * nrevs / orbsInDay / 2;
-        let ts0 = ts - window;
-        let ts1 = ts + window;
-        let points = this.propagateAll(sat, orbs, ts0, ts1);
-        traces[sat] = points.map(gLatLngDeg);
-        this.satOrbs[sat] = orbs;
-        this.satelliteIcon(orbs, ts0, ts1);
-      })
-    )).then(_ => this.render(traces));
+      return { points, marker, updater };
+    });
   }
 
-  createLabel(title, satnum) {
+  _createUpdater(marker, orbs, ts0, ts1) {
+    return _ => {
+      if (!marker)
+        return false;
+      let now = Date.now();
+      if (now < ts0 || now > ts1) {
+        marker.setMap(null);
+        return false;
+      }
+
+      let closest = this._closest(orbs, Date.now());
+      let point = closest.predict(Date.now());
+      let pos = MapComponent.gLatLngDeg(point);
+      marker.setPosition(pos);
+      return true;
+    };
+  }
+
+  _createLabel(title, satnum) {
     let c = document.createElement('div');
     c.innerHTML = '<strong>' + title + '</strong><br>(' + satnum + ')';
     let info = new google.maps.InfoWindow({
@@ -210,81 +273,38 @@ class MapComponent extends EventEmitter {
     return info;
   }
 
-  satelliteIcon(orbs, ts0, ts1) {
-    let now = new Date().getTime();
-    if (now < ts0 || now > ts1) return;
-    let closest = this.closest(orbs, now);
-    let point = closest.predict(now);
-    let pos = gLatLngDeg(point);
-    let marker = this.satelliteMarker(pos);
-    marker.satnum = orbs[0].satnum;
-    let lbl = this.createLabel(Satellite.get(marker.satnum).name, marker.satnum);
+  _satelliteIcon(satnum) {
+    let marker = this._satelliteMarker();
+    let satTitle = Satellite.get(satnum).name;
+    let lbl = this._createLabel(satTitle, satnum);
     google.maps.event.addListener(marker, 'click', () => {
       lbl.open(this.map, marker);
     });
-    this.markers.push(marker);
+    return marker;
   }
 
-  updateMarkers() {
-    if (!this.satOrbs)
-      return;
-    for (let mrk of this.markers) {
-      if (!this.satOrbs[mrk.satnum])
-        continue;
-      let closest = this.closest(this.satOrbs[mrk.satnum], Date.now());
-      let point = closest.predict(Date.now());
-      let pos = gLatLngDeg(point);
-      mrk.setPosition(pos);
-    }
-  }
-
-  render(traces) {
-    let i = 0;
-    for (let satnum in traces) {
-      let gpoints = traces[satnum];
-      let path = this.createPath(gpoints, i);
-      this.showPath(path);
-      ++i;
-    }
-
-    for (let mrk of this.markers)
-      mrk.setMap(this.map);
-  }
-
-  showPath(path) {
-    this.paths.push(path);
-    path.setMap(this.map);
-  }
-
-  clearMap() {
-    for (let path of this.paths)
-      path.setMap(null);
-    for (let marker of this.markers)
-      marker.setMap(null);
-
-    this.paths = [];
-    this.markers = [];
-  }
-
-  closest(orbs, ts) {
+  _closest(orbs, ts) {
     return orbs.reduce((o1, o2) =>
       o2.timeDist(ts) < o1.timeDist(ts) ? o2 : o1);
   }
 
-  showSatellite(satnum) {
-    if (this.activeSatallites.indexOf(satnum) === -1) {
-      this.activeSatallites.push(satnum);
-    }
-
-    this.updateTraces();
+  _showPath(satnum) {
+    if (!this.traces[satnum])
+      return;
+    let map = this.map;
+    let { path, marker } = this.traces[satnum];
+    path.setMap(map);
+    if (marker)
+      marker.setMap(map);
   }
 
-  hideSatellite(satnum) {
-    let ri = this.activeSatallites.indexOf(satnum);
-    if (ri !== -1) {
-      this.activeSatallites.splice(ri, 1);
-    }
-
-    this.updateTraces();
+  _hidePath(satnum) {
+    if (!this.traces[satnum])
+      return;
+    let { path, marker, timer } = this.traces[satnum];
+    path.setMap(null);
+    if (marker)
+      marker.setMap(null);
+    clearInterval(timer);
   }
 }

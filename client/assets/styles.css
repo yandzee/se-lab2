@@ -1,0 +1,91 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.main-layout {
+  display: flex;
+  flex-flow: row nowrap;
+  height: 100%;
+  overflow: hidden;
+}
+
+.first-column {
+  display: flex;
+  flex: 0 0 400px;
+  flex-direction: column;
+  box-shadow: 0 0 4px 0 #808080;
+}
+
+.second-column {
+  flex: 1 0 auto;
+  padding: 0 15px 15px 15px;
+}
+
+.first-column .top {
+  flex: 1 0 1px;
+  overflow: hidden;
+}
+
+.first-column .bottom {
+  flex: 1 0 1px;
+  overflow: hidden;
+}
+
+#list-component {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#map-component {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#info-component {
+  display: flex;
+  flex-direction: column;
+  box-shadow: -1px 0px 4px 0 #808080;
+  height: 100%;
+}
+
+.scrollable {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.title-column {
+  width: 300px;
+}
+
+.td-label {
+  width: 120px;
+}
+
+.td-input {
+  width: 150px;
+}
+
+.search tr {
+  display: none;
+}
+
+.search tr.selected {
+  display: table-row;
+}
+
+.table-marginless {
+  margin-bottom: 0 !important;
+}
+
+.fixedsize {
+  flex: 0 0 auto;
+}
+
+#google-map {
+  flex: 1 1 auto;
+}

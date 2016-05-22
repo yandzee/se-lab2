@@ -3,7 +3,7 @@
   <head>
       <title>Satellite Tracker</title>
       <meta charset="utf-8">
-      <link rel="stylesheet" href="styles/core.css">
+      <link rel="stylesheet" href="assets/styles.css">
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
       <script src="http://code.jquery.com/jquery-2.2.3.min.js"></script>
@@ -12,7 +12,6 @@
       <script src="satellite.min.js"></script>
       <script src="model.js"></script>
       <script src="utils.js"></script>
-      <script src="fetcher.js"></script>
       <script src="list.js"></script>
       <script src="map.js"></script>
       <script src="info.js"></script>
@@ -35,7 +34,8 @@
           <tr><td><b>Period</b></td><td><%period%> minutes</td></tr>
           <tr><td><b>Semi major axis</b></td><td><%semimajor%> km</td></tr>
           <tr><td><b>RCS</b></td><td><%rcs%> m<sup>2</sup></td></tr>
-          <tr><td><b>Launch date</b></td><td><%launch%></td></tr>
+          <tr><td><b>Launch</b></td><td><%launch%></td></tr>
+          <tr><td><b>Decay</b></td><td><%decay%></td></tr>
           <tr><td><b>Source</b></td><td><%source%></td></tr>
           <tr><td><b>Launch site</b></td><td><%site%></td></tr>
           <tr><td><b>Note</b></td><td><%note%></td></tr>
@@ -43,41 +43,49 @@
       </script>
   </head>
   <body>  
-    <div class="first-column">   
-      <div class="top-first-column">
-        <div id="list-component">
-          <h3 class="component-header">Satellites</h3>
-          <table class="table table-bordered table-condensed" style="margin-bottom: 0;">
-            <thead>
-              <tr>
-                <td class="title-column">
-                  <input class="form-control input-xs" placeholder="Title" id="title-filter">
-                </td>
-                <td>
-                  <input type="number" class="form-control input-xs" placeholder="ID" id="id-filter">
-                </td>
-              </tr>
-              <tr>
-                <th>Title</th><th>ID</th>
-              </tr>
-            </thead>
-          </table>
-          <div class="table-content">
-            <table class="table table-bordered table-condensed" id='search-table'>
-              <tbody id="satellites" class="scroll"></tbody>
-            </table>
+    <div class="main-layout">
+      <div class="first-column">
+          <div class="top" id ="list-component">
+            <h3>Satellites</h3>
+            <table class="table table-condensed table-marginless">
+              <thead>
+                <tr>
+                  <td class="title-column">
+                    <input class="form-control input-xs" placeholder="Title" id="title-filter">
+                  </td>
+                  <td>
+                    <input type="number" class="form-control input-xs" placeholder="ID" id="id-filter">
+                  </td>
+                </tr>
+                <tr>
+                  <th id='title-sort'>
+                    Title
+                    <span class="pull-right glyphicon glyphicon-triangle-bottom"></span>
+                  </th>
+                  <th id='id-sort'>
+                    ID
+                    <span class="pull-right glyphicon glyphicon-triangle-bottom"></span>
+                  </th>
+                </tr>
+              </thead>
+            </table>             
+            <div class="scrollable">
+              <table class="table table-condensed table-marginless" id='search-table'>
+                <tbody id="satellites"></tbody>
+              </table>
+            </div>
+            <button class="btn btn-primary btn-block fixedsize disabled" id='next-selected'>
+              Show next selected
+            </button>
           </div>
-        </div>
+          <div class="bottom" id="info-component">
+            <div class="scrollable" id="info-content">
+              
+            </div>
+          </div>
       </div>
-      <div class="bottom-first-column">
-        <div id="info-component">
-          <h3 class="component-header">Satellite info</h3>
-        </div>
-      </div>
-    </div>
-    <div class="second-column">
-      <div id="map-component">
-        <h3 class="component-header">Map</h3>
+      <div class="second-column" id="map-component">
+        <h3>Map</h3>
         <table class="table table-condensed map-table">
           <tr>
             <td class="td-label"><label>Since</label></td>
@@ -96,26 +104,20 @@
         </div>
       </div>
     </div>
-    <div class="config-button">
-      <button class="btn btn-primary" id="config-btn" data-toggle="modal" data-target="#config-modal">
-        <span class="glyphicon glyphicon-wrench"></span>
-      </button>
-    </div>
-    <div class="modal fade" id="config-modal" tabindex="-1">
+    <div class="modal fade" id="error-modal">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal">
-              <span>&times;</span>
-            </button>
-            <h4 class="modal-title" id="myModalLabel">Configuration</h4>
+            <span>&times;</span></button>
+            <h4 class="modal-title" id="error-modal">Error message</h4>
           </div>
           <div class="modal-body">
-            ...
+            An error occured while fetching data from server.
+            Check your connection.
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary" id='config-save-btn'>Save changes</button>
           </div>
         </div>
       </div>
