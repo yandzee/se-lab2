@@ -1,5 +1,8 @@
 'use strict';
 
+//#TODO: manual TLE saving
+//#TODO: configuration window
+
 let list = new ListComponent($('#list-component'));
 let map  = new MapComponent($('#map-component'));
 let info = new InfoComponent($('#info-component'));
