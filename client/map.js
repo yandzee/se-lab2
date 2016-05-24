@@ -1,5 +1,6 @@
 'use strict';
 
+//#FIXME: there are satellites with trace path lies out of map
 class MapComponent extends EventEmitter {
   constructor($mapComponent) {
     super();
@@ -9,8 +10,6 @@ class MapComponent extends EventEmitter {
     this.untilInput = $mapComponent.find('#until-date');
     this.certainInput = $mapComponent.find('#certain-date');
     this.revolInput = $mapComponent.find('#revol-amount');
-    this.startAz = $mapComponent.find('#start-az');
-    this.endAz = $mapComponent.find('#end-az');
     this.showPeriodBtn = $mapComponent.find('#show-period-btn');
     this.showCertainBtn = $mapComponent.find('#show-certain-btn');
 
@@ -104,6 +103,7 @@ class MapComponent extends EventEmitter {
   }
 
   _makeHandlers() {
+    //#FIXME: show error message when connection is broken and inputs values is changed
     let $showPeriodBtn = this.showPeriodBtn;
     let $showCertainBtn = this.showCertainBtn;
     let $sinceInput = this.sinceInput;
@@ -292,6 +292,7 @@ class MapComponent extends EventEmitter {
     if (!this.traces[satnum])
       return;
     let map = this.map;
+
     let { path, marker } = this.traces[satnum];
     path.setMap(map);
     if (marker)

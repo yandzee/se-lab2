@@ -54,6 +54,8 @@ class ListComponent extends EventEmitter {
       if (!e.ctrlKey && !e.altKey)
         return;
       let $tr = $(e.currentTarget);
+
+      //#FIXME: untoggle 'info' class when connection is failed
       $tr.toggleClass('info');
       let satnum = $tr.data('satnum');
       if ($tr.hasClass('info')) {
