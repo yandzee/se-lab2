@@ -33,7 +33,7 @@ browser 127.0.0.1:3000
 
 
 ## Диаграмма развертывания
-![Диаграмма развертывания](images/depdiag.png)
+![Диаграмма развертывания](depdiag.png)
 
 ## Code style
 [airbnb](https://github.com/airbnb/javascript)
