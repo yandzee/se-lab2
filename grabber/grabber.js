@@ -72,7 +72,7 @@ class Grabber {
 
     for (let tle of tles) {
       try {
-        yield* this.processTLE(tle);
+        yield* this._processTLE(tle);
       } catch (ex) {
         if (ex instanceof extractor.InvalidTLEError) {
           console.error(`Error while processing TLE from ${fetcher.info}: ${ex.message}`);
@@ -87,16 +87,16 @@ class Grabber {
     yield this.db.run('commit');
   }
 
-  *processTLE(tle) {
+  *_processTLE(tle) {
     let orbel = extractor.parseTLE(tle);
 
     yield [
-      this.addSatelliteIfNeeded(orbel),
-      this.addOrbelement(orbel),
+      this._addSatelliteIfNeeded(orbel),
+      this._addOrbelement(orbel),
     ];
   }
 
-  *addSatelliteIfNeeded(orbel) {
+  *_addSatelliteIfNeeded(orbel) {
     let row = yield this.sql.selectLaunch.get(orbel.satnum);
 
     if (!row)
@@ -111,7 +111,7 @@ class Grabber {
     }
   }
 
-  *addOrbelement(orbel) {
+  *_addOrbelement(orbel) {
     let o = orbel;
     yield this.sql.insertOrbelement.run(o.satnum, o.timestamp, o.epochyr, o.epochdays,
                                         o.bstar, o.inclo, o.nodeo, o.ecco, o.argpo, o.mo, o.no);

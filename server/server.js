@@ -36,15 +36,15 @@ class Server {
 
     app.context.searcher = searcher;
 
-    app.use(this.logger);
+    app.use(this._logger);
 
-    app.use(this.checker);
-    app.use(this.satellites);
-    app.use(this.info);
-    app.use(this.period);
-    app.use(this.revol);
+    app.use(this._checker);
+    app.use(this._satellites);
+    app.use(this._info);
+    app.use(this._period);
+    app.use(this._revol);
 
-    app.use(this.file);
+    app.use(this._file);
   }
 
   listen(port) {
@@ -56,14 +56,14 @@ class Server {
    * `this` refers to koa context.
    */
 
-  *logger(next) {
+  *_logger(next) {
     let start = Date.now();
     yield* next;
     let ms = Date.now() - start;
     console.log('%s %s - %sms', this.method, this.url, ms);
   }
 
-  *checker(next) {
+  *_checker(next) {
     try {
       yield* next;
     } catch (ex) {
@@ -77,7 +77,7 @@ class Server {
     }
   }
 
-  *satellites(next) {
+  *_satellites(next) {
     if (this.path !== '/satellites')
       return yield* next;
 
@@ -85,7 +85,7 @@ class Server {
     this.body = yield* this.searcher.satellites();
   }
 
-  *info(next) {
+  *_info(next) {
     if (this.path !== '/info')
       return yield* next;
 
@@ -96,7 +96,7 @@ class Server {
     this.body = info;
   }
 
-  *period(next) {
+  *_period(next) {
     if (this.path !== '/period')
       return yield* next;
 
@@ -111,7 +111,7 @@ class Server {
     this.body = result;
   }
 
-  *revol(next) {
+  *_revol(next) {
     if (this.path !== '/revol')
       return yield* next;
 
@@ -126,7 +126,7 @@ class Server {
     this.body = result;
   }
 
-  *file(next) {
+  *_file(next) {
     let rpath = this.path === '/' ? '/index.html' : this.path;
     let fpath = path.resolve(__dirname + '/../client' + rpath);
 
